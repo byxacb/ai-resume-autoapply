@@ -1,0 +1,12 @@
+# orchestrator 依赖
+#
+# 第三方:
+httpx>=0.27
+redis>=5.0
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.6
+
+# 可选 (auto_job worker):
+# undetected-chromedriver>=3.5
+# selenium>=4.15

@@ -1,0 +1,94 @@
+# docker-compose.yml
+# 一键起整套：Redis + Resume-Matcher 后端 + 前端 + Orchestrator + auto_job Worker
+
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ai-resume-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  resume-matcher-backend:
+    build:
+      context: ../Resume-Matcher/apps/backend
+      dockerfile: Dockerfile
+    container_name: ai-resume-rm-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      REDIS_URL: redis://redis:6379/0
+      DATA_DIR: /app/data
+      LOG_LEVEL: INFO
+    volumes:
+      - rm-data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  resume-matcher-frontend:
+    build:
+      context: ../Resume-Matcher/apps/frontend
+      dockerfile: Dockerfile
+    container_name: ai-resume-rm-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://resume-matcher-backend:8000
+    depends_on:
+      - resume-matcher-backend
+
+  orchestrator-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    container_name: ai-resume-orchestrator
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      RESUME_MATCHER_URL: http://resume-matcher-backend:8000
+      REDIS_URL: redis://redis:6379/0
+      LOG_LEVEL: INFO
+    volumes:
+      - ./candidates:/app/candidates:ro
+    depends_on:
+      - redis
+      - resume-matcher-backend
+
+  auto-job-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: ai-resume-worker
+    restart: unless-stopped
+    environment:
+      RESUME_MATCHER_URL: http://resume-matcher-backend:8000
+      REDIS_URL: redis://redis:6379/0
+      DISPLAY: :99  # Xvfb display
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix  # X11 forwarding for browser
+      - ./browser-profile:/app/browser-profile  # persistent login
+    depends_on:
+      - redis
+      - resume-matcher-backend
+    profiles: ["with-worker"]  # opt-in: docker compose --profile with-worker up
+
+volumes:
+  redis-data:
+  rm-data:
