@@ -187,3 +187,51 @@ ai-resume-integration/
 本仓库代码：MIT
 Resume-Matcher 代码：Apache 2.0（保留原 license）
 auto_job 代码：保留原作者声明（README 中作者特别声明"不要拿去割韭菜"）
+
+
+## 🖥️ Web 可视化控制台
+
+启动后访问 **http://localhost:8080** 即可在浏览器中管理整个系统。
+
+### 功能 Tab
+| Tab | 作用 |
+|-----|------|
+| 📊 **仪表盘** | 实时 KPI（待处理/处理中/已完成/失败）+ 配置摘要 + 最近完成任务 |
+| 🚀 **运行任务** | 选择候选人 + JD 来源（上传/抓取/粘贴），一键启动 |
+| 👤 **候选人** | 新建/删除候选人（带简历文件上传） |
+| 📋 **队列** | 查看 Redis 中待处理任务（实时刷新） |
+| 📜 **日志** | WebSocket 实时日志流（带暂停/清空） |
+| ⚙️ **配置** | 当前运行时配置（只读 JSON） |
+
+### 本地启动（推荐）
+```bash
+# 1. 安装依赖
+pip install -r orchestrator/requirements.txt
+
+# 2. 启动 Web Dashboard（含 API + 静态文件 + WebSocket）
+python -m uvicorn web.server:app --host 0.0.0.0 --port 8080
+```
+
+打开浏览器：**http://localhost:8080**
+
+### Docker 启动
+```bash
+docker compose up -d
+# 访问 http://localhost:8080
+```
+
+### 自动刷新
+仪表盘数据每 5 秒自动刷新，队列每 3 秒刷新，WebSocket 持续推送日志。
+
+### 主要接口
+- `GET  /`                          → 仪表盘 UI
+- `GET  /health`                    → 健康检查
+- `POST /run`                       → 启动投递任务
+- `GET  /stats`                     → KPI + 配置
+- `GET  /jobs/recent`               → 最近完成任务
+- `GET  /queue/pending`             → 队列等待任务
+- `POST /candidate`                 → 创建候选人
+- `GET  /candidates`                → 候选人列表
+- `POST /resume/upload`             → 上传简历
+- `GET  /metrics`                   → Prometheus 指标
+- `WS   /ws/logs`                   → 日志 WebSocket 流
