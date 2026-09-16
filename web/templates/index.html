@@ -30,7 +30,7 @@
     <button class="tab" data-tab="metrics">📈 监控</button>
     <button class="tab" data-tab="boss-apply">💼 BOSS 投递</button>
     <button class="tab" data-tab="settings">⚙️ 配置</button>
-  <button class="tab" data-tab="precheck">🔍 前置检查</button><button class="tab" data-tab="boss-batch">📦 BOSS 批量</button></nav>
+  <button class="tab" data-tab="precheck">🔍 前置检查</button><button class="tab" data-tab="boss-batch">📦 BOSS 批量</button><button class="tab" data-tab="failed">❌ 失败</button></nav>
 
   <main>
     <!-- ============ Dashboard ============ -->
@@ -409,6 +409,23 @@
         <div class="card-body">
           <div id="precheck-results" class="precheck-list"></div>
           <button class="btn" onclick="runPrecheck()">刷新检查</button>
+        </div>
+      </div>
+    </section>
+  
+    <section id="tab-failed" class="tab-pane">
+      <div class="card">
+        <div class="card-header"><h2>失败任务</h2></div>
+        <div class="card-body">
+          <div class="table-toolbar">
+            <input type="text" id="failed-search" placeholder="搜索失败任务..." oninput="renderFailedTable()">
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>ID</th><th>公司</th><th>职位</th><th>状态</th><th>时间</th><th>操作</th></tr></thead>
+              <tbody id="failed-table"><tr><td colspan="6" class="empty">暂无失败任务</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

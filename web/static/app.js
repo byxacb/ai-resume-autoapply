@@ -1115,3 +1115,38 @@ async function clearQueue() {
     showToast('清空失败: ' + e.message, 'error');
   }
 }
+
+async function renderFailedTable() {
+  const tbody = document.querySelector('#failed-table');
+  if (!tbody) return;
+  try {
+    const data = await api('/queue/failed?limit=50');
+    const search = (document.getElementById('failed-search')?.value || '').toLowerCase();
+    let jobs = data.jobs || [];
+    if (search) {
+      jobs = jobs.filter(j => 
+        (j.job_id || '').toLowerCase().includes(search) ||
+        (j.company || '').toLowerCase().includes(search) ||
+        (j.title || '').toLowerCase().includes(search)
+      );
+    }
+    if (jobs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无失败任务</td></tr>';
+      return;
+    }
+    tbody.innerHTML = jobs.map(j => {
+      const jobId = escapeHtml(j.job_id || '');
+      const error = escapeHtml((j.get('error') || j.get('error_message') || '')[:100]);
+      return '<tr>' +
+        '<td><code>' + jobId.slice(-12) + '</code></td>' +
+        '<td>' + escapeHtml(j.company || '-') + '</td>' +
+        '<td>' + escapeHtml(j.title || '-') + '</td>' +
+        '<td><span class="score-pill score-low">失败</span></td>' +
+        '<td>' + escapeHtml((j.created_at || '').slice(11, 19)) + '</td>' +
+        '<td><button class="btn btn-sm" data-action="queue-retry" data-job-id="' + jobId + '">重试</button></td>' +
+      '</tr>';
+    }).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">加载失败: ' + escapeHtml(e.message) + '</td></tr>';
+  }
+}

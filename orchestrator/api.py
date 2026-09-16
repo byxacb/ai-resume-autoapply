@@ -233,6 +233,14 @@ async def queue_pending(limit: int = 50):
         return {"jobs": [asdict(job) for job in queue._pending[: max(1, limit)]]}
     return {"jobs": []}
 
+@app.get("/queue/failed")
+async def queue_failed(limit: int = 50):
+    q = make_queue()
+    jobs = []
+    if hasattr(q, "_failed"):
+        jobs = [asdict(job) if hasattr(job, "__dataclass_fields__") else job for job in q._failed[: max(1, limit)]]
+    return {"jobs": jobs}
+
 @app.get("/queue/completed")
 async def queue_completed(limit: int = 50):
     q = make_queue()
