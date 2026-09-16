@@ -18,6 +18,7 @@ import json
 import logging
 import time
 import uuid
+from dataclasses import asdict
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional

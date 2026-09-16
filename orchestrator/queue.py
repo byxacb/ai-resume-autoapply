@@ -239,6 +239,8 @@ class InMemoryQueue:
         }
 
 
+_in_memory_queue = InMemoryQueue()
+
 def make_queue(redis_url: Optional[str] = None):
     """工厂函数：有 Redis 用 Redis，没有用 InMemory"""
     import os
@@ -248,5 +250,5 @@ def make_queue(redis_url: Optional[str] = None):
             return JobQueue(url)
         except Exception as e:
             logger.warning(f"Redis connection failed ({e}), falling back to InMemoryQueue")
-            return InMemoryQueue()
-    return InMemoryQueue()
+            return _in_memory_queue
+    return _in_memory_queue
