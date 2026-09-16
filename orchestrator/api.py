@@ -208,6 +208,21 @@ async def recent_jobs(limit: int = 20):
         return {"jobs": []}
 
 
+@app.get("/queue/stats")
+async def queue_stats():
+    q = make_queue()
+    stats = {}
+    if hasattr(q, "get_stats"):
+        stats = q.get_stats()
+    elif hasattr(q, "_pending"):
+        stats = {
+            "pending": len(getattr(q, "_pending", [])),
+            "processing": len(getattr(q, "_processing", {})),
+            "completed": len(getattr(q, "_completed", [])),
+            "failed": len(getattr(q, "_failed", [])),
+        }
+    return {"stats": stats}
+
 @app.get("/queue/pending")
 async def queue_pending(limit: int = 50):
     queue = make_queue()

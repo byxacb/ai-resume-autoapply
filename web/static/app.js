@@ -1084,3 +1084,19 @@ async function clearCompleted() {
     showToast('清空失败: ' + e.message, 'error');
   }
 }
+
+async function loadQueueStats() {
+  try {
+    const data = await api('/queue/stats');
+    const stats = data.stats || {};
+    const el = document.getElementById('queue-stats');
+    if (!el) return;
+    el.innerHTML = 
+      '<div class="kpi-card kpi-blue"><div class="kpi-label">待处理</div><div class="kpi-value">' + (stats.pending || 0) + '</div></div>' +
+      '<div class="kpi-card kpi-amber"><div class="kpi-label">处理中</div><div class="kpi-value">' + (stats.processing || 0) + '</div></div>' +
+      '<div class="kpi-card kpi-green"><div class="kpi-label">已完成</div><div class="kpi-value">' + (stats.completed || 0) + '</div></div>' +
+      '<div class="kpi-card kpi-red"><div class="kpi-label">失败</div><div class="kpi-value">' + (stats.failed || 0) + '</div></div>';
+  } catch (e) {
+    console.error('loadQueueStats failed', e);
+  }
+}
