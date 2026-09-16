@@ -1,94 +1,148 @@
-# docker-compose.yml
-# 一键起整套：Redis + Resume-Matcher 后端 + 前端 + Orchestrator + auto_job Worker
-
-version: "3.9"
-
 services:
   redis:
     image: redis:7-alpine
-    container_name: ai-resume-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   resume-matcher-backend:
     build:
-      context: ../Resume-Matcher/apps/backend
-      dockerfile: Dockerfile
-    container_name: ai-resume-rm-backend
+      context: ../Resume-Matcher
+      dockerfile: apps/backend/Dockerfile
     restart: unless-stopped
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-deepseek}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-chat}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      - DATABASE_URL=sqlite:///./resume_matcher.db
+      - REDIS_URL=redis://redis:6379/0
     ports:
       - "8000:8000"
-    environment:
-      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com/v1}
-      REDIS_URL: redis://redis:6379/0
-      DATA_DIR: /app/data
-      LOG_LEVEL: INFO
     volumes:
-      - rm-data:/app/data
+      - ../Resume-Matcher:/app
+      - resume_matcher_data:/app/data
     depends_on:
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   resume-matcher-frontend:
     build:
-      context: ../Resume-Matcher/apps/frontend
-      dockerfile: Dockerfile
-    container_name: ai-resume-rm-frontend
+      context: ../Resume-Matcher
+      dockerfile: apps/frontend/Dockerfile
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://resume-matcher-backend:8000
+      - VITE_API_URL=http://localhost:8000
     depends_on:
-      - resume-matcher-backend
+      resume-matcher-backend:
+        condition: service_healthy
 
   orchestrator-api:
     build:
       context: .
       dockerfile: Dockerfile.orchestrator
-    container_name: ai-resume-orchestrator
     restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - LLM_PROVIDER=${LLM_PROVIDER:-deepseek}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-chat}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      - RESUME_MATCHER_URL=http://resume-matcher-backend:8000
+      - BOSS_COOKIE=${BOSS_COOKIE}
+      - BOSS_CITY=${BOSS_CITY:-101010100}
+      - MIN_MATCH_SCORE=${MIN_MATCH_SCORE:-60}
+      - HIGH_MATCH_SCORE=${HIGH_MATCH_SCORE:-75}
+      - MAX_APPLY_PER_HOUR=${MAX_APPLY_PER_HOUR:-20}
+      - MAX_APPLY_PER_DAY=${MAX_APPLY_PER_DAY:-100}
     ports:
       - "8080:8080"
-    environment:
-      RESUME_MATCHER_URL: http://resume-matcher-backend:8000
-      REDIS_URL: redis://redis:6379/0
-      LOG_LEVEL: INFO
     volumes:
-      - ./candidates:/app/candidates:ro
+      - ./orchestrator:/app/orchestrator
+      - ./web:/app/web
+      - ./candidates:/app/candidates
+      - uploads:/app/uploads
     depends_on:
-      - redis
-      - resume-matcher-backend
+      redis:
+        condition: service_healthy
+      resume-matcher-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   auto-job-worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: ai-resume-worker
     restart: unless-stopped
     environment:
-      RESUME_MATCHER_URL: http://resume-matcher-backend:8000
-      REDIS_URL: redis://redis:6379/0
-      DISPLAY: :99  # Xvfb display
+      - REDIS_URL=redis://redis:6379/0
+      - LLM_PROVIDER=${LLM_PROVIDER:-deepseek}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-chat}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      - BOSS_COOKIE=${BOSS_COOKIE}
+      - BOSS_CITY=${BOSS_CITY:-101010100}
+      - MAX_APPLY_PER_HOUR=${MAX_APPLY_PER_HOUR:-20}
+      - MAX_APPLY_PER_DAY=${MAX_APPLY_PER_DAY:-100}
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix  # X11 forwarding for browser
-      - ./browser-profile:/app/browser-profile  # persistent login
+      - ./auto_job:/app/auto_job
+      - ./orchestrator:/app/orchestrator
+      - ./candidates:/app/candidates
     depends_on:
-      - redis
-      - resume-matcher-backend
-    profiles: ["with-worker"]  # opt-in: docker compose --profile with-worker up
+      redis:
+        condition: service_healthy
+    profiles: ["with-worker"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./monitoring/dashboards:/prometheus_dashboards
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-lifecycle
+    depends_on:
+      - orchestrator-api
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_ORG_CREATION=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./monitoring/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+    depends_on:
+      - prometheus
 
 volumes:
-  redis-data:
-  rm-data:
+  redis_data:
+  resume_matcher_data:
+  uploads:
+  grafana_data:
