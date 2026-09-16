@@ -371,9 +371,11 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
               _sys.path.insert(0, str(auto_job_dir))
           from finding_jobs_v2 import open_browser_with_stealth, wait_for_login, click_chat_button, send_message_to_chat_box
           from prompts_v2 import build_cover_letter_prompt
+          session_dir = "/tmp/boss_chrome_session"
+          os.makedirs(session_dir, exist_ok=True)
           base_url = "https://www.zhipin.com/web/geek/job-recommend?ka=header-job-recommend"
           target_url = f"https://www.zhipin.com/gongsi/job/{boss_job_id}.html" if boss_job_id else base_url
-          driver = open_browser_with_stealth(target_url)
+          driver = open_browser_with_stealth(target_url, session_dir=session_dir)
           wait_for_login(180)
           prompt = build_cover_letter_prompt(
               candidate_name=candidate.get("name") or "求职者",
