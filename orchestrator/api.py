@@ -389,7 +389,7 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
           from finding_jobs_v2 import open_browser_with_stealth, wait_for_login, click_chat_button, send_message_to_chat_box, load_boss_accounts
           from prompts_v2 import build_cover_letter_prompt
           account = _pick_boss_account()
-          session_dir = "/tmp/boss_chrome_session_" + str(hash(str(account))) if account else "/tmp/boss_chrome_session"
+          session_dir = req.get("account_session_dir") or ("/tmp/boss_chrome_session_" + str(hash(str(account))) if account else "/tmp/boss_chrome_session")
           os.makedirs(session_dir, exist_ok=True)
           base_url = "https://www.zhipin.com/web/geek/job-recommend?ka=header-job-recommend"
           target_url = f"https://www.zhipin.com/gongsi/job/{boss_job_id}.html" if boss_job_id else base_url

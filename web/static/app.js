@@ -592,7 +592,15 @@ async function submitBossApply() {
     const candResp = await api('/candidates');
     const cand = (candResp.candidates || []).find(c => c.id === candidateId);
     const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years, company: '' } : { name: '求职者', title: '', years: 0 };
-    const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
+    const account = getSelectedBossAccount();
+    const payload = { 
+      boss_job_id: bossJobId, 
+      jd_text: jdText, 
+      candidate, 
+      resume_path: cand?.resume_path || '', 
+      max_jobs: 1,
+      account_session_dir: account ? (account.session_dir || "") : ""
+    };
     const data = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
     showToast('投递任务已进入队列：run_id=' + data.run_id);
     refreshQueue();
