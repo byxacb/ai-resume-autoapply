@@ -854,3 +854,31 @@ function clearLogs() {
   document.getElementById('logs') && (document.getElementById('logs').innerHTML = '');
 }
 setTimeout(connectLogs, 500);
+
+let traceCounter = 0;
+function traceRequest(key) {
+  traceCounter += 1;
+  const id = traceCounter;
+  const el = document.getElementById('trace-log');
+  if (!el) return id;
+  const row = document.createElement('div');
+  row.className = 'trace-row';
+  row.dataset.id = id;
+  row.dataset.key = key;
+  row.innerHTML = '<span class="ts">' + new Date().toLocaleTimeString() + '</span> <b>' + escapeHtml(key) + '</b> <span class="trace-status">⏳</span>';
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
+  return id;
+}
+function traceSuccess(id, message) {
+  const row = document.querySelector('.trace-row[data-id="' + id + '"]');
+  if (row) { row.querySelector('.trace-status').textContent = '✅ ' + (message || 'success'); }
+}
+function traceFail(id, message) {
+  const row = document.querySelector('.trace-row[data-id="' + id + '"]');
+  if (row) { row.querySelector('.trace-status').textContent = '❌ ' + (message || 'failed'); }
+}
+window.api = window.api || {};
+window.api.traceRequest = traceRequest;
+window.api.traceSuccess = traceSuccess;
+window.api.traceFail = traceFail;
