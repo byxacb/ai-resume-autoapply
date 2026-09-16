@@ -1014,3 +1014,35 @@ async function renderBossApplyRecent() {
   }
 }
 \nasync function fetchBossAccounts() {\n  const sel = document.getElementById('boss-account-select');\n  if (!sel) return;\n  try {\n    const data = await api('/boss/accounts');\n    const accounts = Array.isArray(data.accounts) ? data.accounts : [];\n    accounts.forEach(function(acc, idx) {\n      const opt = document.createElement('option');\n      opt.value = String(idx);\n      opt.textContent = acc.label || ('账号 ' + (idx + 1));\n      sel.appendChild(opt);\n    });\n  } catch (e) {\n    // ignore accounts unavailable\n  }\n}\nfunction getSelectedBossAccount() {\n  const sel = document.getElementById('boss-account-select');\n  if (!sel || !sel.value) return null;\n  return { idx: Number(sel.value), label: sel.options[sel.selectedIndex]?.textContent || '' };\n}\n
+async function retryJob(jobId) {
+  try {
+    const res = await fetch('/queue/' + encodeURIComponent(jobId) + '/retry', { method: 'POST' });
+    if (res.ok) {
+      showToast('已重新投递：' + jobId, 'success');
+      refreshQueue();
+    } else {
+      showToast('重试失败：' + (await res.text()), 'error');
+    }
+  } catch (e) {
+    showToast('重试失败：' + e.message, 'error');
+  }
+}
+async function removeJob(jobId) {
+  try {
+    const res = await fetch('/queue/' + encodeURIComponent(jobId), { method: 'DELETE' });
+    if (res.ok) {
+      showToast('已移除：' + jobId, 'success');
+      refreshQueue();
+    } else {
+      showToast('移除失败：' + (await res.text()), 'error');
+    }
+  } catch (e) {
+    showToast('移除失败：' + e.message, 'error');
+  }
+}
+document.addEventListener('click', (ev) => {
+  const retryBtn = ev.target.closest('[data-action="queue-retry"]');
+  if (retryBtn && retryBtn.dataset.jobId) retryJob(retryBtn.dataset.jobId);
+  const removeBtn = ev.target.closest('[data-action="queue-remove"]');
+  if (removeBtn && removeBtn.dataset.jobId) removeJob(removeBtn.dataset.jobId);
+});

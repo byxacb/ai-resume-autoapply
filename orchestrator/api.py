@@ -189,6 +189,24 @@ async def queue_pending(limit: int = 50):
     return {"jobs": []}
 
 
+
+@app.post("/queue/{job_id}/retry")
+async def queue_retry(job_id: str):
+    q = make_queue()
+    if hasattr(q, "retry"):
+        q.retry(job_id)
+        return {"status": "retrying", "job_id": job_id}
+    raise HTTPException(404, "retry not supported")
+
+@app.delete("/queue/{job_id}")
+async def queue_remove(job_id: str):
+    q = make_queue()
+    if hasattr(q, "remove"):
+        q.remove(job_id)
+        return {"status": "removed", "job_id": job_id}
+    raise HTTPException(404, "remove not supported")
+
+
 @app.post("/candidate", response_model=CandidateResponse)
 async def create_candidate(req: CandidateRequest):
     store = CandidateStore()

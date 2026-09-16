@@ -173,6 +173,34 @@ class InMemoryQueue:
         self._processing.pop(job.job_id, None)
         self._failed.append({**asdict(job), "error": error})
 
+    def retry(self, job_id: str) -> bool:
+        for idx, job in enumerate(list(self._failed)):
+            if job.get("job_id") == job_id:
+                self._failed.pop(idx)
+                try:
+                    self._pending.append(ApplyJob.from_json(json.dumps(job)))
+                except Exception:
+                    pass
+                return True
+        return False
+
+    def remove(self, job_id: str) -> bool:
+        for key_name, container in [("_pending", self._pending), ("_processing", self._processing), ("_completed", self._completed), ("_failed", self._failed)]:
+            if key_name == "_processing":
+                for jid, job in list(container.items()):
+                    if getattr(job, "job_id", "") == job_id:
+                        del container[jid]
+                        return True
+            else:
+                for idx, item in enumerate(list(container)):
+                    if isinstance(item, ApplyJob) and item.job_id == job_id:
+                        container.pop(idx)
+                        return True
+                    if isinstance(item, dict) and item.get("job_id") == job_id:
+                        container.pop(idx)
+                        return True
+        return False
+
 
     def recent(self, limit: int = 50) -> list:
         # include class-level recent first so pending/queued jobs don't get lost
