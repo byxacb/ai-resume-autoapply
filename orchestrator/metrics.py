@@ -92,7 +92,7 @@ class Histogram:
         out = [f"# HELP {self.name} {self.help}", f"# TYPE {self.name} histogram"]
         for b in self.buckets:
             label = "+Inf" if b == float("inf") else str(b)
-            out.append(f'{self.name}_bucket{{le="{label}"}}} {self.bucket_counts[b]}')
+            out.append(self.name + '_bucket{le="' + label + '"} ' + str(self.bucket_counts[b]))
         out.append(f"{self.name}_sum {self.sum}")
         out.append(f"{self.name}_count {self.count}")
         return "\n".join(out)
