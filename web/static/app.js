@@ -99,7 +99,8 @@ async function refreshRecent() {
       const ats = j.ats_score || 0;
       const status = j.status || 'completed';
       const time = (j.completed_at || j.created_at || '').slice(11, 19);
-      return `<tr>
+      const jobJson = escapeHtml(JSON.stringify(j));
+      return `<tr data-job="${jobJson}">
         <td>${escapeHtml(time)}</td>
         <td>${escapeHtml(j.company)}</td>
         <td>${escapeHtml(j.title)}</td>
@@ -271,7 +272,8 @@ async function refreshQueue() {
     }
     tbody.innerHTML = data.jobs.map(j => {
       const ats = j.ats_score || 0;
-      return `<tr>
+      const jobJson = escapeHtml(JSON.stringify(j));
+      return `<tr data-job="${jobJson}">
         <td><code>${escapeHtml((j.job_id || '').slice(-12))}</code></td>
         <td>${escapeHtml(j.company)}</td>
         <td>${escapeHtml(j.title)}</td>
@@ -466,3 +468,36 @@ function cancelUpload(cancelKey) {
 // Init drop zones
 setupDropZone("cand-resume-drop", "cand-resume", "cand-resume-progress", "cand-resume-name", "cand-resume-bar", "cand");
 setupDropZone("jd-file-drop", "jd-file", "jd-file-progress", "jd-file-name", "jd-file-bar", "jd");
+
+// === Job Detail Modal ===
+function openJobDetail(job) {
+  const modal = document.getElementById("job-detail-modal");
+  if (!modal || !job) return;
+  document.getElementById("jd-modal-title").textContent = job.title || "职位详情";
+  document.getElementById("jd-company").textContent = job.company || "—";
+  document.getElementById("jd-title").textContent = job.title || "—";
+  document.getElementById("jd-score").textContent = typeof job.ats_score === "number" ? job.ats_score.toFixed(0) : "—";
+  document.getElementById("jd-status").textContent = job.status || "—";
+  document.getElementById("jd-text").textContent = job.jd_text || job.description || "暂无";
+  document.getElementById("jd-match").textContent = job.match_result ? JSON.stringify(job.match_result, null, 2) : "—";
+  document.getElementById("jd-cover").textContent = job.cover_letter || "—";
+  modal.style.display = "flex";
+}
+function closeJobDetail() {
+  const modal = document.getElementById("job-detail-modal");
+  if (modal) modal.style.display = "none";
+}
+
+// Wire table rows to open modal
+function wireJobTable(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  table.addEventListener("click", (e) => {
+    const tr = e.target.closest("tr[data-job]");
+    if (!tr) return;
+    try {
+      const job = JSON.parse(tr.dataset.job);
+      openJobDetail(job);
+    } catch (err) { console.error(err); }
+  });
+}
