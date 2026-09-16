@@ -444,3 +444,6 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .precheck-item.fail { border-color: #ef4444; }
 .precheck-icon { font-size: 18px; }
   
+td.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+td.actions .btn { padding: 4px 8px; font-size: 12px; }
+  
