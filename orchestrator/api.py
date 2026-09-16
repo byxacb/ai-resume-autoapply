@@ -372,18 +372,19 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
 @app.get("/boss/apply/{run_id}/result")
 async def boss_apply_result(run_id: str):
   q = make_queue()
-  jobs = q.recent(limit=50)
-  job = next((j for j in jobs if j.job_id == run_id), None)
+  job = None
+  if hasattr(q, "recent"):
+      jobs = q.recent(limit=50)
+      job = next((j for j in jobs if j.get("job_id") == run_id), None)
   if not job:
-    raise HTTPException(404, "run_id not found")
+      raise HTTPException(404, "run_id not found")
   return {
     "run_id": run_id,
-    "status": job.status or "queued",
-    "company": job.company,
-    "title": job.title,
-    "boss_job_id": job.boss_job_id or "",
-    "created_at": str(job.created_at),
-    "completed_at": str(job.completed_at) if job.completed_at else None,
+    "status": job.get("status", "queued"),
+    "company": job.get("company", ""),
+    "title": job.get("title", ""),
+    "boss_job_id": job.get("boss_job_id", ""),
+    "created_at": str(job.get("created_at", "")),
   }
 
 if __name__ == "__main__":

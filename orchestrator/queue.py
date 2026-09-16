@@ -157,6 +157,19 @@ class InMemoryQueue:
         self._processing.pop(job.job_id, None)
         self._failed.append({**asdict(job), "error": error})
 
+
+    def recent(self, limit: int = 50) -> list:
+        combined = []
+        for job in list(self._completed):
+            d = asdict(job)
+            d["status"] = "completed"
+            combined.append(d)
+        for item in list(self._failed):
+            combined.append(item.copy())
+            combined[-1]["status"] = "failed"
+        combined.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        return combined[: max(1, limit)]
+
     def get_stats(self) -> dict:
         return {
             "pending": len(self._pending),
