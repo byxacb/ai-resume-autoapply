@@ -395,7 +395,8 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
       used_real = False
   q = make_queue()
   q.push(job)
-  metrics.JOBS_PROCESSED.labels(result=job.status).inc()
+  result_label = getattr(job, "status", "queued") or "queued"
+  metrics.JOBS_PROCESSED.labels(result=result_label).inc()
   metrics.INFLIGHT_RUNS.inc()
   background_tasks.add_task(_run_in_background, run_id, job.resume_pdf_path, [{"company": job.company, "title": job.title, "jd_text": jd_text}], candidate, max_jobs)
   return {"status": job.status, "run_id": run_id, "job_id": job.job_id}

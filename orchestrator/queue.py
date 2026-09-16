@@ -52,6 +52,7 @@ class ApplyJob:
     matched_skills: list = field(default_factory=list)
     missing_skills: list = field(default_factory=list)
     resume_pdf_path: str = ""
+    status: str = "queued"
     created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
 
     def to_json(self):
@@ -160,6 +161,14 @@ class InMemoryQueue:
 
     def recent(self, limit: int = 50) -> list:
         combined = []
+        for job in list(self._pending):
+            d = asdict(job)
+            d["status"] = "pending"
+            combined.append(d)
+        for job_id, job in list(self._processing.items()):
+            d = asdict(job)
+            d["status"] = "processing"
+            combined.append(d)
         for job in list(self._completed):
             d = asdict(job)
             d["status"] = "completed"
