@@ -350,3 +350,11 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .metric-label{font-size:13px;color:#6b7280;margin-bottom:6px;}
 .metric-value{font-size:28px;font-weight:700;color:#1f2937;}
 .metrics-pre{background:#f9fafb;padding:16px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:12px;overflow:auto;white-space:pre-wrap;word-break:break-all;max-height:600px;}
+
+/* === Drag Drop === */
+.drop-zone{border:2px dashed #d1d5db;border-radius:12px;padding:24px;text-align:center;color:#6b7280;background:#f9fafb;transition:all .2s;cursor:pointer;}
+.drop-zone.dragover{border-color:#4f46e5;background:#eef2ff;color:#4f46e5;}
+.upload-progress{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:8px;}
+.upload-progress-bar{height:100%;background:#4f46e5;width:0%;transition:width .2s;}
+.upload-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f9fafb;border-radius:8px;margin-top:8px;}
+.upload-item .name{flex:1;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

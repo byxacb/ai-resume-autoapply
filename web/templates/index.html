@@ -121,8 +121,18 @@
 
             <div class="form-row" id="jd-upload-row">
               <label>JD JSON 文件</label>
-              <input type="file" id="jd-file" accept=".json" />
-              <small>JSON 格式：[{"company":"...","title":"...","jd_text":"..."}]</small>
+              <div class="drop-zone" id="jd-file-drop">
+              <div>📎 拖拽 JD JSON 文件到这里，或点击选择</div>
+              <input type="file" id="jd-file" accept=".json" style="display:none" />
+              <small>JSON 格式：[{"company":"...","title":"...","jd_text":"%"}]</small>
+            </div>
+            <div id="jd-file-progress" style="display:none">
+              <div class="upload-item">
+                <span class="name" id="jd-file-name"></span>
+                <button class="btn btn-sm btn-danger" onclick="cancelUpload('jd')">取消</button>
+              </div>
+              <div class="upload-progress"><div class="upload-progress-bar" id="jd-file-bar"></div></div>
+            </div>
             </div>
 
             <div class="form-row" id="jd-scrape-row" style="display:none">

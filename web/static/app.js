@@ -395,3 +395,74 @@ async function refreshMetrics() {
 document.querySelectorAll(".tab").forEach(t => {
   t.addEventListener("click", () => { if (t.dataset.tab === "metrics") refreshMetrics(); });
 });
+
+// === Drag & Drop Upload ===
+const uploadControllers = {};
+
+function setupDropZone(zoneId, inputId, progressId, nameId, barId, cancelKey) {
+  const zone = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  if (!zone || !input) return;
+
+  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("dragover"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.classList.remove("dragover");
+    const files = e.dataTransfer.files;
+    if (files.length) handleUpload(files[0], progressId, nameId, barId, cancelKey);
+  });
+  input.addEventListener("change", () => {
+    if (input.files.length) handleUpload(input.files[0], progressId, nameId, barId, cancelKey);
+    input.value = "";
+  });
+}
+
+async function handleUpload(file, progressId, nameId, barId, cancelKey) {
+  const progressEl = document.getElementById(progressId);
+  const nameEl = document.getElementById(nameId);
+  const barEl = document.getElementById(barId);
+  if (progressEl) progressEl.style.display = "block";
+  if (nameEl) nameEl.textContent = file.name;
+  if (barEl) barEl.style.width = "0%";
+
+  const controller = new AbortController();
+  uploadControllers[cancelKey] = controller;
+
+  const form = new FormData();
+  form.append("file", file);
+
+  try {
+    const resp = await fetch("/resume/upload", {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+    if (!resp.ok) throw new Error("Upload failed: " + resp.status);
+    const data = await resp.json();
+    if (barEl) barEl.style.width = "100%";
+    // store path in hidden field if needed
+    window.__lastUploadedResume = data.path;
+    appendLog("success", "上传完成: " + file.name + " -> " + data.path);
+  } catch (e) {
+    if (e.name === "AbortError") {
+      appendLog("warn", "上传已取消");
+    } else {
+      appendLog("error", "上传失败: " + e.message);
+    }
+  } finally {
+    if (barEl) barEl.style.width = "0%";
+    if (progressEl) progressEl.style.display = "none";
+    delete uploadControllers[cancelKey];
+  }
+}
+
+function cancelUpload(cancelKey) {
+  const ctrl = uploadControllers[cancelKey];
+  if (ctrl) ctrl.abort();
+}
+
+// Init drop zones
+setupDropZone("cand-resume-drop", "cand-resume", "cand-resume-progress", "cand-resume-name", "cand-resume-bar", "cand");
+setupDropZone("jd-file-drop", "jd-file", "jd-file-progress", "jd-file-name", "jd-file-bar", "jd");
