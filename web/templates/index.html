@@ -82,7 +82,17 @@
               <option value="processing">processing</option>
             </select>
             <button class="sort-btn" data-sort="recent" data-key="ats_score">按分数排序</button>
-          </div>
+          
+    <select id="queue-status-filter" onchange="refreshQueue()">
+      <option value="">全部状态</option>
+      <option value="queued">待处理</option>
+      <option value="processing">处理中</option>
+      <option value="completed">已完成</option>
+      <option value="failed">失败</option>
+    </select>
+    <button class="btn btn-sm btn-danger" onclick="clearCompleted()">清空已完成</button>
+    <button class="btn btn-sm btn-danger" onclick="clearQueue()">清空队列</button>
+  </div>
 <table class="table" id="recent-table">
             <thead>
               <tr>
