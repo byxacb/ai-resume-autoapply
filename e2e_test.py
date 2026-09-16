@@ -13,11 +13,11 @@ def check(name,fn):
 
 def get(p):
     r=requests.get(base+p, timeout=10)
-    return {'code':r.status_code,'body':r.text[:120]}
+    return {'code':r.status_code,'body':r.text}
 
 def post(p,body):
     r=requests.post(base+p,json=body, timeout=10)
-    return {'code':r.status_code,'body':r.text[:180]}
+    return {'code':r.status_code,'body':r.text}
 
 # 1. UI loads
 check('ui_html', lambda: get('/'))
