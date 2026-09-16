@@ -186,6 +186,8 @@ async def queue_pending(limit: int = 50):
     if hasattr(queue, "redis"):
         items = queue.redis.lrange("ai-resume:jobs:pending", 0, limit - 1)
         return {"jobs": [json.loads(item) for item in items]}
+    if hasattr(queue, "_pending"):
+        return {"jobs": [asdict(job) for job in queue._pending[: max(1, limit)]]}
     return {"jobs": []}
 
 

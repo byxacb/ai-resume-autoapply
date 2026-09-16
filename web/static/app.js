@@ -306,12 +306,14 @@ async function refreshQueue() {
     tbody.innerHTML = data.jobs.map(j => {
       const ats = j.ats_score || 0;
       const jobJson = escapeHtml(JSON.stringify(j));
+      const jobId = escapeHtml(j.job_id || '');
       return `<tr data-job="${jobJson}">
-        <td><code>${escapeHtml((j.job_id || '').slice(-12))}</code></td>
+        <td><code>${jobId.slice(-12)}</code></td>
         <td>${escapeHtml(j.company)}</td>
         <td>${escapeHtml(j.title)}</td>
         <td><span class="score-pill ${scoreClass(ats)}">${ats.toFixed(0)}</span></td>
         <td>${escapeHtml((j.created_at || '').slice(11, 19))}</td>
+        <td><button class="btn btn-sm" data-action="queue-retry" data-job-id="${jobId}">重试</button> <button class="btn btn-sm btn-danger" data-action="queue-remove" data-job-id="${jobId}">移除</button></td>
       </tr>`;
     }).join('');
   } catch (e) {
