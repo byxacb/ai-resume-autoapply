@@ -281,3 +281,8 @@ def set_config(new_config: OrchestratorConfig) -> None:
 
 # Auto-load on import
 load_config()
+
+# === BOSS Apply retry settings ===
+BOSS_APPLY_MAX_RETRIES: int = 3
+BOSS_APPLY_BACKOFF_BASE: float = 2.0
+BOSS_APPLY_BACKOFF_MAX: float = 60.0

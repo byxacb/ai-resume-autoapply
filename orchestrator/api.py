@@ -434,6 +434,55 @@ async def boss_apply_recent(limit: int = 20):
 @app.get("/alerts/recent")
 async def alerts_recent(limit: int = 50):
     return {"alerts": metric_alerts.recent(limit=limit)}
+async def _boss_apply_with_retry(payload: dict):
+    import time
+    from .config import CONFIG
+    max_retries = getattr(CONFIG, "BOSS_APPLY_MAX_RETRIES", 3)
+    backoff_base = getattr(CONFIG, "BOSS_APPLY_BACKOFF_BASE", 2.0)
+    backoff_max = getattr(CONFIG, "BOSS_APPLY_BACKOFF_MAX", 60.0)
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            return await _attempt_boss_apply(payload)
+        except Exception as e:
+            last_err = e
+            wait = min(backoff_base ** attempt, backoff_max)
+            print(f"boss apply attempt {attempt} failed: {e}, retry in {wait}s")
+            time.sleep(wait)
+    raise last_err
+
+async def _attempt_boss_apply(payload: dict):
+    # Reuse real apply logic without retry
+    boss_job_id = (payload.get("boss_job_id") or "").strip()
+    jd_text = payload.get("jd_text") or ""
+    candidate = payload.get("candidate") or {}
+    auto_job_dir = Path(__file__).resolve().parent.parent.parent / "auto_job" / "auto_job_find"
+    if not auto_job_dir.exists():
+        raise RuntimeError("auto_job modules missing")
+    import sys as _sys
+    if str(auto_job_dir) not in _sys.path:
+        _sys.path.insert(0, str(auto_job_dir))
+    from finding_jobs_v2 import open_browser_with_stealth, wait_for_login, click_chat_button, send_message_to_chat_box
+    from prompts_v2 import build_cover_letter_prompt
+    url = "https://www.zhipin.com/web/geek/job-recommend?ka=header-job-recommend" if not boss_job_id else f"https://www.zhipin.com/gongsi/job/{boss_job_id}.html"
+    open_browser_with_stealth(url)
+    wait_for_login(180)
+    cover = build_cover_letter_prompt(
+        candidate_name=candidate.get("name") or "求职者",
+        candidate_title=candidate.get("title") or "",
+        years_experience=int(candidate.get("years") or 0),
+        matched_skills=[candidate.get("top_skill") or "相关技术栈"],
+        missing_skills=[],
+        ats_score=78.0,
+        job_description=jd_text or "",
+    )
+    sent = False
+    if click_chat_button():
+        send_message_to_chat_box(cover)
+        sent = True
+    return {"sent": sent, "cover_letter": cover if sent else ""}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
