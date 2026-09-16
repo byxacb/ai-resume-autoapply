@@ -718,3 +718,29 @@ async function submitBossApply() {
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
+
+async function submitBossApply() {
+  const bossJobId = document.getElementById('boss-job-id')?.value?.trim() || '';
+  const jdText = document.getElementById('boss-jd-text')?.value?.trim() || '';
+  const candidateId = document.getElementById('run-candidate')?.value;
+  if (!bossJobId && !jdText) { showToast('请输入 BOSS Job ID 或 JD 文本', 'warn'); return; }
+  try {
+    const candResp = await api('/candidates');
+    const cand = (candResp.candidates || []).find(c => c.id === candidateId);
+    const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years } : { name: '求职者', title: '', years: 0 };
+    const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
+    const res = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
+    showToast('投递任务已进入队列：run_id=' + res.run_id, 'success');
+    // poll result
+    setTimeout(async () => {
+      try {
+        const r = await api('/boss/apply/' + res.run_id + '/result');
+        showToast('投递结果：' + (r.status || 'unknown'), r.status === 'completed' ? 'success' : 'info');
+      } catch (e) { /* ignore */ }
+    }, 3000);
+    refreshQueue();
+  } catch (e) {
+    showToast('投递失败：' + e.message, 'error');
+  }
+}
+document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });

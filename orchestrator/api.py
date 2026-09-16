@@ -369,6 +369,23 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
   background_tasks.add_task(_run_in_background, run_id, job.resume_pdf_path, [{"company": job.company, "title": job.title, "jd_text": jd_text}], candidate, max_jobs)
   return {"status": "queued", "run_id": run_id, "job_id": job.job_id}
 
+@app.get("/boss/apply/{run_id}/result")
+async def boss_apply_result(run_id: str):
+  q = make_queue()
+  jobs = q.recent(limit=50)
+  job = next((j for j in jobs if j.job_id == run_id), None)
+  if not job:
+    raise HTTPException(404, "run_id not found")
+  return {
+    "run_id": run_id,
+    "status": job.status or "queued",
+    "company": job.company,
+    "title": job.title,
+    "boss_job_id": job.boss_job_id or "",
+    "created_at": str(job.created_at),
+    "completed_at": str(job.completed_at) if job.completed_at else None,
+  }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
