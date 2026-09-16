@@ -92,3 +92,27 @@ passed=sum(1 for r in report if r['status']=='PASS')
 failed=sum(1 for r in report if r['status']=='FAIL')
 skipped=sum(1 for r in report if r['status']=='SKIP')
 print(json.dumps({'passed':passed,'failed':failed,'skipped':skipped,'details':report}, ensure_ascii=False))
+
+# === BOSS Apply endpoints ===
+def test_boss_apply_endpoint():
+    payload = {"boss_job_id": "12345", "jd_text": "Example JD", "candidate": {"name": "Test", "title": "Dev", "years": 2}, "max_jobs": 1}
+    r = requests.post(API + "/boss/apply", json=payload)
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert "run_id" in data
+    run_id = data["run_id"]
+    r = requests.get(API + "/boss/apply/{}/result".format(run_id))
+    assert r.status_code == 200
+    result = r.json()
+    assert result.get("run_id") == run_id
+
+def test_boss_apply_recent():
+    r = requests.get(API + "/boss/apply/recent?limit=5")
+    assert r.status_code == 200
+    data = r.json()
+    assert "items" in data
+
+def run_boss_tests():
+    test_boss_apply_endpoint()
+    test_boss_apply_recent()
+    print("BOSS apply tests passed")
