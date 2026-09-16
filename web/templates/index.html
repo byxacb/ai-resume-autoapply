@@ -443,5 +443,20 @@
 
   <script src="/static/app.js"></script>
 <div id="toast-container"></div>
+
+<!-- Run Result Drawer -->
+<div id="run-result-drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-backdrop" data-close="drawer"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <h3>Run Result</h3>
+      <button class="icon-btn" data-close="drawer" aria-label="关闭">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="kv" id="run-result-meta"></div>
+      <pre class="code-block" id="run-result-body"></pre>
+    </div>
+  </div>
+</div>
 </body>
 </html>

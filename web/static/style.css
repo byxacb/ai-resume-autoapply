@@ -426,3 +426,14 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   .chart-grid { grid-template-columns: 1fr; }
   .modal-content { width: 95vw; }
 }
+
+/* drawer */
+.drawer { position: fixed; inset: 0; z-index: 2000; pointer-events: none; }
+.drawer[aria-hidden="false"] { pointer-events: auto; }
+.drawer-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; transition: opacity .2s; }
+.drawer[aria-hidden="false"] .drawer-backdrop { opacity: 1; }
+.drawer-panel { position: absolute; right: 0; top: 0; bottom: 0; width: min(560px, 94vw); background: var(--bg); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform .22s ease; padding: 18px; overflow: auto; }
+.drawer[aria-hidden="false"] .drawer-panel { transform: translateX(0); }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.code-block { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 10px; white-space: pre-wrap; }
+.kv > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }

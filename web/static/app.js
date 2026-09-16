@@ -936,3 +936,72 @@ setTimeout(async () => {
   sel.innerHTML = '<option value="">-- 选择候选人 --</option>' + (data.candidates || []).map(c => "<option value="" + c.id + "">" + escapeHtml(c.name) + " (" + escapeHtml(c.title) + ")</option>").join("");
 }, 500);
 
+
+async function openRunResult(run_id) {
+  const drawer = document.getElementById('run-result-drawer');
+  const meta = document.getElementById('run-result-meta');
+  const body = document.getElementById('run-result-body');
+  if (!drawer) return;
+  drawer.setAttribute('aria-hidden', 'false');
+  meta.innerHTML = '<div><b>run_id</b></div><div>' + escapeHtml(run_id) + '</div>' +
+    '<div><b>status</b></div><div>loading...</div>' +
+    '<div><b>created_at</b></div><div>-</div>';
+  body.textContent = 'loading...';
+  try {
+    const data = await api('/boss/apply/' + run_id + '/result');
+    const sc = document.querySelector('.drawer-header h3');
+    if (sc) sc.textContent = 'Run Result';
+    meta.innerHTML = 
+      '<div><b>run_id</b></div><div>' + escapeHtml(data.run_id || run_id) + '</div>' +
+      '<div><b>status</b></div><div>' + escapeHtml(data.status || '-') + '</div>' +
+      '<div><b>company</b></div><div>' + escapeHtml(data.company || '-') + '</div>' +
+      '<div><b>title</b></div><div>' + escapeHtml(data.title || '-') + '</div>' +
+      '<div><b>boss_job_id</b></div><div>' + escapeHtml(data.boss_job_id || '-') + '</div>' +
+      '<div><b>created_at</b></div><div>' + escapeHtml(String(data.created_at || '-')) + '</div>';
+    body.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    const sc = document.querySelector('.drawer-header h3');
+    if (sc) sc.textContent = 'Run Result';
+    body.textContent = '加载失败: ' + e.message;
+  }
+}
+function closeRunResult() {
+  const drawer = document.getElementById('run-result-drawer');
+  if (drawer) drawer.setAttribute('aria-hidden', 'true');
+}
+async function loadBossRecent() {
+  const list = document.getElementById('boss-recent-list');
+  if (!list) return;
+  try {
+    const data = await api('/boss/apply/recent?limit=20');
+    renderRecentTable(list, data.items || [], { col: 'created_at', dir: 'desc' });
+  } catch (e) {
+    list.innerHTML = '<div class="empty">加载失败: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+async function loadQueueTable() {
+  const list = document.getElementById('queue-list');
+  if (!list) return;
+  try {
+    const data = await api('/queue/pending');
+    renderQueueTable(list, data.jobs || [], { col: 'created_at', dir: 'desc' });
+  } catch (e) {
+    list.innerHTML = '<div class="empty">加载失败: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+document.addEventListener('click', function(ev) {
+  const close = ev.target.closest('[data-close="drawer"]');
+  if (close) closeRunResult();
+  const runBtn = ev.target.closest('[data-action="open-run-result"]');
+  if (runBtn && runBtn.dataset.runId) openRunResult(runBtn.dataset.runId);
+});
+async function renderBossApplyRecent() {
+  const list = document.getElementById('boss-recent-list');
+  if (!list) return;
+  try {
+    const data = await api('/boss/apply/recent?limit=20');
+    renderRecentTable(list, data.items || [], { col: 'created_at', dir: 'desc' });
+  } catch (e) {
+    list.innerHTML = '<div class="empty">加载失败: ' + escapeHtml(e.message) + '</div>';
+  }
+}
