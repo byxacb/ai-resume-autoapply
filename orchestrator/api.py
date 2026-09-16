@@ -418,6 +418,19 @@ async def boss_apply_result(run_id: str):
     "created_at": str(job.get("created_at", "")),
   }
 
+@app.get("/boss/jobs/{boss_job_id}")
+async def boss_job_detail(boss_job_id: str):
+  return {"boss_job_id": boss_job_id, "title": "", "company": "", "active": True}
+
+@app.get("/boss/apply/recent")
+async def boss_apply_recent(limit: int = 20):
+  q = make_queue()
+  out = []
+  if hasattr(q, "recent"):
+    for j in q.recent(limit=limit):
+      out.append({"run_id": j.get("job_id"), "status": j.get("status"), "company": j.get("company"), "title": j.get("title"), "boss_job_id": j.get("boss_job_id", ""), "created_at": j.get("created_at")})
+  return {"items": out}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
