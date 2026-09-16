@@ -52,7 +52,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -68,6 +68,9 @@ class RunRequest(BaseModel):
     max_jobs: int = 10
     min_score: Optional[float] = None
 
+    # Forward-compatible: UI may send a scrape payload instead of jd_list/jd_file_path
+    scrape: Optional[dict] = Field(default=None, description="前端搜索抓取参数")
+
 
 class RunResponse(BaseModel):
     status: str
@@ -79,7 +82,7 @@ class RunResponse(BaseModel):
 
 
 class CandidateRequest(BaseModel):
-    name: str
+    name: str = Field(max_length=200)
     title: str = ""
     years: int = 0
     resume_path: str = ""
@@ -123,7 +126,17 @@ async def run_orchestrator(req: RunRequest, background_tasks: BackgroundTasks):
         jd_list = json.loads(path.read_text(encoding="utf-8"))
 
     if not jd_list:
-        raise HTTPException(400, "No JD list provided (use jd_file_path or jd_list)")
+        # 兼容前端直接发送的 scrape 字段
+        if req.scrape:
+            # 延迟导入避免循环
+            from orchestrator.scraper import quick_scrape
+            query = req.scrape.get("query") or ""
+            city = req.scrape.get("city") or ""
+            max_jobs = int(req.scrape.get("max_jobs") or req.max_jobs)
+            if query:
+                jd_list = quick_scrape(query, city, max_jobs)
+        if not jd_list:
+            raise HTTPException(400, "No JD list provided (use jd_file_path, jd_list, or scrape)")
 
     candidate = {
         "name": req.candidate_name or "求职者",
@@ -159,8 +172,12 @@ async def stats():
 
 @app.get("/jobs/recent")
 async def recent_jobs(limit: int = 20):
-    queue = make_queue()
-    return {"jobs": queue.get_recent_completed(limit=limit)}
+    try:
+        queue = make_queue()
+        return {"jobs": queue.get_recent_completed(limit=limit)}
+    except Exception as e:
+        logger.warning(f"/jobs/recent degraded: {e}")
+        return {"jobs": []}
 
 
 @app.get("/queue/pending")
