@@ -358,3 +358,40 @@ connectWS();
 appendLog('info', '控制台已启动。后端地址：' + API);
 appendLog('info', 'Dashboard init complete');
 console.log('[DEBUG] Dashboard loaded, API=', API);
+
+// === Metrics Tab ===
+function parsePrometheus(text) {
+  const lines = text.split("\n");
+  const res = {};
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const idx = line.indexOf(" ");
+    if (idx < 0) continue;
+    const name = line.slice(0, idx).split("{")[0];
+    const num = Number(line.slice(idx + 1).trim());
+    if (!Number.isNaN(num)) res[name] = num;
+  }
+  return res;
+}
+
+async function refreshMetrics() {
+  try {
+    const r = await fetch("/metrics");
+    const text = await r.text();
+    const data = parsePrometheus(text);
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v ?? "—"; };
+    set("m-queue-size", data["ai_resume_queue_size"]);
+    set("m-jobs-processed", data["ai_resume_jobs_processed_total"]);
+    set("m-total-runs", data["ai_resume_runs_total"]);
+    set("m-candidates", data["ai_resume_candidates_total"]);
+    set("m-inflight", data["ai_resume_inflight_runs"]);
+    set("m-llm-tokens", data["ai_resume_llm_tokens_total"]);
+    const raw = document.getElementById("metrics-raw");
+    if (raw) raw.textContent = text;
+  } catch (e) { console.error(e); }
+}
+
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => { if (t.dataset.tab === "metrics") refreshMetrics(); });
+});

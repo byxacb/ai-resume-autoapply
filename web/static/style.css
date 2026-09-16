@@ -343,3 +343,10 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
   .tab { padding: 12px; font-size: 13px; }
   main { padding: 12px; }
 }
+
+/* === Metrics === */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;}
+.metric-card{background:#f9fafb;border-radius:12px;padding:16px;border-left:4px solid #4f46e5;}
+.metric-label{font-size:13px;color:#6b7280;margin-bottom:6px;}
+.metric-value{font-size:28px;font-weight:700;color:#1f2937;}
+.metrics-pre{background:#f9fafb;padding:16px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:12px;overflow:auto;white-space:pre-wrap;word-break:break-all;max-height:600px;}

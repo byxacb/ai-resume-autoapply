@@ -26,7 +26,8 @@
     <button class="tab" data-tab="candidates">👤 候选人</button>
     <button class="tab" data-tab="queue">📋 队列</button>
     <button class="tab" data-tab="logs">📜 日志</button>
-    <button class="tab" data-tab="settings">⚙️ 配置</button>
+    <button class="tab" <button class="tab" data-tab="metrics">📈 监控</button>
+    <button class="tab" data-tab="settings">>⚙️ 配置</button>
   </nav>
 
   <main>
@@ -225,6 +226,45 @@
         </div>
         <div class="card-body">
           <div id="logs" class="logs"></div>
+        </div>
+      </div>
+    </section>
+
+        <!-- ============ Metrics ============ 
+    <section id="tab-metrics" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h2>Prometheus 指标</h2>
+          <button class="btn btn-sm" onclick="refreshMetrics()">刷新</button>
+        </div>
+        <div class="card-body">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Queue Size</div>
+              <div class="metric-value" id="m-queue-size">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Jobs Processed</div>
+              <div class="metric-value" id="m-jobs-processed">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Total Runs</div>
+              <div class="metric-value" id="m-total-runs">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Candidates</div>
+              <div class="metric-value" id="m-candidates">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">In-Flight Runs</div>
+              <div class="metric-value" id="m-inflight">—</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">LLM Tokens</div>
+              <div class="metric-value" id="m-llm-tokens">—</div>
+            </div>
+          </div>
+          <pre class="metrics-pre" id="metrics-raw">加载中...</pre>
         </div>
       </div>
     </section>
