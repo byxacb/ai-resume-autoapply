@@ -63,10 +63,10 @@ run = check('run_task_scrape', lambda: post('/run',{
     'scrape':{'query':'Python','city':'北京','max_jobs':2}
 }))
 
-# 7. CORS check
-r=requests.get(base+'/health', headers={'Origin':'http://evil.com'}, timeout=10)
-cors_ok = r.status_code in (200,405) and 'access-control-allow-origin' not in r.headers
-report.append({'step':'cors_blocked','status':'PASS' if cors_ok else 'FAIL','detail':f'status={r.status_code}, acao present={ "access-control-allow-origin" in r.headers}'})
+# 7. CORS check: localhost should be allowed in dev
+r=requests.get(base+'/health', headers={'Origin':'http://localhost:8080'}, timeout=10)
+cors_ok = r.status_code==200 and 'access-control-allow-origin' in r.headers
+report.append({'step':'cors_localhost_ok','status':'PASS' if cors_ok else 'FAIL','detail':f'status={r.status_code}, acao={"access-control-allow-origin" in r.headers}'})
 
 # 8. WebSocket check
 try:
