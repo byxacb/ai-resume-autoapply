@@ -807,3 +807,18 @@ async function submitBossApply() {
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
+
+async function refreshBossRecent() {
+  try {
+    const data = await api('/boss/apply/recent?limit=20');
+    const el = document.getElementById('boss-recent-list');
+    if (!el) return;
+    if (!data.items || data.items.length === 0) {
+      el.innerHTML = '<div class="empty">暂无投递记录</div>';
+      return;
+    }
+    el.innerHTML = data.items.map(it => `<div><span class="ts">${escapeHtml((it.created_at||'').slice(0,19))}</span> <b>${escapeHtml(it.company)}</b> / ${escapeHtml(it.title)} <span class="status-${it.status||''}">[${escapeHtml(it.status||'')}]</span></div>`).join('');
+  } catch (e) { console.error(e); }
+}
+setInterval(refreshBossRecent, 5000);
+refreshBossRecent();
