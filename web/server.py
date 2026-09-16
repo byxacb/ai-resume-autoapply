@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from orchestrator.api import app as orchestrator_app
 from orchestrator.queue import make_queue
 from orchestrator.metrics import render as render_metrics
+from orchestrator.metrics_enhanced import alerts as metric_alerts
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,11 @@ class WebSocketLogHub:
 
 
 log_hub = WebSocketLogHub()
+
+@app.get("/alerts/recent")
+async def alerts_recent(limit: int = 50):
+    return {"alerts": metric_alerts.recent(limit=limit)}
+
 
 
 @app.get("/")

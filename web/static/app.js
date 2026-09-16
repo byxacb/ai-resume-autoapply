@@ -700,3 +700,21 @@ document.getElementById('boss-apply-form-v2')?.addEventListener('submit', async 
     showToast('投递失败：' + e.message, 'error');
   }
 });
+
+async function refreshAlerts() {
+  try {
+    const data = await api("/alerts/recent?limit=50");
+    const el = document.getElementById("alerts-list");
+    if (!el) return;
+    if (!data.alerts || data.alerts.length === 0) {
+      el.innerHTML = "<div class=\"empty\">无告警</div>";
+      return;
+    }
+    el.innerHTML = data.alerts.map(a => {
+      const time = new Date(a.ts * 1000).toLocaleTimeString();
+      return `<div><span class="ts">${time}</span><span class="log-line ${a.level || 'warn'}">[${a.level}] ${escapeHtml(a.metric)}: ${escapeHtml(a.message)}</span></div>`;
+    }).join("");
+  } catch (e) { console.error(e); }
+}
+setInterval(refreshAlerts, 5000);
+refreshAlerts();
