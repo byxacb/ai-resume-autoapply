@@ -146,6 +146,36 @@ async function refreshRecent() {
   }
 }
 
+
+document.addEventListener('click', async (e) => {
+  const tr = e.target.closest('tr[data-job]');
+  if (tr && !e.target.closest('button')) {
+    const job = JSON.parse(tr.getAttribute('data-job') || '{}');
+    renderQueueDrawer(job);
+  }
+});
+
+async function renderQueueDrawer(job) {
+  const body = document.getElementById('queue-drawer-body');
+  if (!body) return;
+  const fields = [
+    ['job_id', job.job_id],
+    ['公司', job.company],
+    ['职位', job.title],
+    ['状态', job.status],
+    ['ATS 分数', job.ats_score],
+    ['BOSS Job ID', job.boss_job_id],
+    ['候选人', job.candidate_name],
+    ['创建时间', job.created_at],
+    ['JD', job.jd_text || ''],
+    ['匹配技能', (job.matched_skills || []).join(', ')],
+    ['缺失技能', (job.missing_skills || []).join(', ')],
+    ['简历路径', job.resume_pdf_path || ''],
+    ['封面信', job.cover_letter || ''],
+  ];
+  body.innerHTML = fields.map(([k, v]) => `<div class="drawer-row"><div class="drawer-key">${escapeHtml(k)}</div><div class="drawer-val">${escapeHtml(String(v ?? '-'))}</div></div>`).join('');
+  openDrawer('queue-drawer');
+}
 // === Candidates ===
 async function loadCandidates() {
   try {
@@ -675,6 +705,8 @@ function renderRecentTable(jobs) {
   // existing logic will be wrapped by pagination in caller if needed
 }
 
+function openDrawer(id) { document.getElementById(id).style.display = 'block'; document.body.style.overflow = 'hidden'; }
+function closeDrawer(id) { document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
 function showToast(message, kind='info') {
   let container = document.getElementById('toast-container');
   if (!container) {

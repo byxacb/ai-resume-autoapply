@@ -447,3 +447,11 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 td.actions { display: flex; gap: 6px; flex-wrap: wrap; }
 td.actions .btn { padding: 4px 8px; font-size: 12px; }
   
+.drawer { position: fixed; inset: 0; z-index: 1100; }
+.drawer-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.35); }
+.drawer-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 420px; max-width: 92vw; background: #fff; box-shadow: -6px 0 24px rgba(0,0,0,0.12); display:flex; flex-direction:column; }
+.drawer-header { display:flex; align-items:center; justify-content:space-between; padding: 14px 16px; border-bottom: 1px solid #e5e7eb; }
+.drawer-body { padding: 16px; overflow: auto; flex: 1; }
+.drawer-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+.drawer-key { width: 110px; color: #6b7280; font-size: 13px; flex-shrink: 0; }
+.drawer-val { flex: 1; color: #111827; font-size: 13px; word-break: break-word; }

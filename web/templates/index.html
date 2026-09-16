@@ -102,7 +102,18 @@
             <tbody>
               <tr><td colspan="5" class="empty">加载中...</td></tr>
             </tbody>
-          <div class="pagination" id="queue-pagination"></div>
+          
+          <div id="queue-drawer" class="drawer" style="display:none">
+            <div class="drawer-overlay" onclick="closeDrawer('queue-drawer')"></div>
+            <div class="drawer-panel">
+              <div class="drawer-header">
+                <h3>任务详情</h3>
+                <button class="drawer-close" onclick="closeDrawer('queue-drawer')">关闭</button>
+              </div>
+              <div id="queue-drawer-body" class="drawer-body"></div>
+            </div>
+          </div>
+<div class="pagination" id="queue-pagination"></div>
           <div class="pagination" id="recent-pagination"></div>
           </table>
           <div class="pagination" id="recent-pagination"></div>
