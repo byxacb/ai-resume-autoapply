@@ -1070,3 +1070,17 @@ async function runPrecheck() {
     container.innerHTML = '<div class="precheck-item fail">检查失败: ' + escapeHtml(e.message) + '</div>';
   }
 }
+
+async function clearCompleted() {
+  try {
+    const res = await fetch('/queue/completed/clear', { method: 'POST' });
+    if (res.ok) {
+      showToast('已清空已完成任务', 'success');
+      refreshQueue();
+    } else {
+      showToast('清空失败', 'error');
+    }
+  } catch (e) {
+    showToast('清空失败: ' + e.message, 'error');
+  }
+}
