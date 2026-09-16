@@ -28,6 +28,7 @@
     <button class="tab" data-tab="queue">📋 队列</button>
     <button class="tab" data-tab="logs">📜 日志</button>
     <button class="tab" data-tab="metrics">📈 监控</button>
+    <button class="tab" data-tab="boss-apply">💼 BOSS 投递</button>
     <button class="tab" data-tab="settings">⚙️ 配置</button>
   </nav>
 
@@ -224,17 +225,17 @@
           <form id="boss-apply-form" class="form">
             <div class="form-row">
               <label>候选人</label>
-              <select id="boss-candidate" required>
+              <select id="boss-candidate-old" required>
                 <option value="">-- 选择候选人 --</option>
               </select>
             </div>
             <div class="form-row">
               <label>BOSS Job ID / 职位链接 ID</label>
-              <input type="text" id="boss-job-id" placeholder="例如 123456789" />
+              <input type="text" id="boss-job-id-old" placeholder="例如 123456789" />
             </div>
             <div class="form-row">
               <label>JD 文本</label>
-              <textarea id="boss-jd-text" rows="6" placeholder="粘贴职位描述，或留空自动抓取"></textarea>
+              <textarea id="boss-jd-text-old" rows="6" placeholder="粘贴职位描述，或留空自动抓取"></textarea>
             </div>
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">投递到队列</button>
@@ -319,7 +320,7 @@
       </div>
     </section>
 
-        <!-- ============ Metrics ============ 
+        <!-- ============ Metrics ============ -->
     <section id="tab-metrics" class="tab-pane">
       <div class="card">
         <div class="card-header">

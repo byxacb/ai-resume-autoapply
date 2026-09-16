@@ -47,10 +47,10 @@ def test_dashboard_and_boss_form():
             REPORT.append({"step": "boss_tab_click", "status": "SKIP", "detail": "boss tab not found"})
 
         # 4. Submit BOSS apply with sample data
-        boss_job_id = page.locator("#boss-job-id, #boss-job-id-v2")
-        jd_text = page.locator("#boss-jd-text, #boss-jd-text-v2")
-        candidate = page.locator("#boss-candidate, #boss-candidate-v2")
-        submit = page.locator("#boss-apply-form button[type='submit'], #boss-apply-form-v2 button[type='submit']")
+        boss_job_id = page.locator("#boss-job-id-v2")
+        jd_text = page.locator("#boss-jd-text-v2")
+        candidate = page.locator("#boss-candidate-v2")
+        submit = page.locator("#boss-apply-form-v2 button[type='submit']")
 
         if boss_job_id.count() > 0:
             boss_job_id.fill("12345")
