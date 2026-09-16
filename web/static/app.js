@@ -356,3 +356,5 @@ connectWS();
 
 // Show first log
 appendLog('info', '控制台已启动。后端地址：' + API);
+appendLog('info', 'Dashboard init complete');
+console.log('[DEBUG] Dashboard loaded, API=', API);
