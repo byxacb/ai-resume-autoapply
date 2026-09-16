@@ -191,6 +191,14 @@ async def queue_pending(limit: int = 50):
         return {"jobs": [asdict(job) for job in queue._pending[: max(1, limit)]]}
     return {"jobs": []}
 
+@app.get("/queue/completed")
+async def queue_completed(limit: int = 50):
+    q = make_queue()
+    jobs = []
+    if hasattr(q, "_completed"):
+        jobs = [asdict(job) for job in q._completed[: max(1, limit)]]
+    return {"jobs": jobs}
+
 
 
 @app.post("/queue/{job_id}/retry")
