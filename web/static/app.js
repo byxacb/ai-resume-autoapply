@@ -502,25 +502,6 @@ function wireJobTable(tableId) {
   });
 }
 
-.width || 300;
-  canvas.height = 180;
-  const w = canvas.width, h = canvas.height;
-  const max = Math.max(...points.map(p => p.v)) || 1;
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle = "#4f46e5";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  const step = w / (points.length - 1 || 1);
-  points.forEach((p, i) => {
-    const x = i * step;
-    const y = h - (p.v / max) * (h - 20) - 10;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-  ctx.fillStyle = "#374151";
-  ctx.font = "12px sans-serif";
-  ctx.fillText(label + " (last " + points.length + " samples)", 8, 16);
-}
 
 // === Chart.js Metrics ===
 let chartQueue = null;
