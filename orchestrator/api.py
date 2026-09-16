@@ -483,6 +483,23 @@ async def _attempt_boss_apply(payload: dict):
     return {"sent": sent, "cover_letter": cover if sent else ""}
 
 
+def _pick_boss_account():
+    from .config import CONFIG
+    accounts = getattr(CONFIG, "BOSS_ACCOUNTS", [])
+    if not accounts:
+        return None
+    strategy = getattr(CONFIG, "ACCOUNT_SELECTION", "round_robin")
+    if strategy == "random":
+        import random
+        return random.choice(accounts)
+    if strategy == "least_used":
+        # placeholder: choose first for now
+        return accounts[0]
+    # round_robin default
+    idx = getattr(_pick_boss_account, "_rr_index", 0)
+    _pick_boss_account._rr_index = (idx + 1) % len(accounts)
+    return accounts[idx]
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

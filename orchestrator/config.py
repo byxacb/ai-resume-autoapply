@@ -286,3 +286,8 @@ load_config()
 BOSS_APPLY_MAX_RETRIES: int = 3
 BOSS_APPLY_BACKOFF_BASE: float = 2.0
 BOSS_APPLY_BACKOFF_MAX: float = 60.0
+
+# === Multi-account load balancing ===
+MULTI_ACCOUNT_ENABLED: bool = False
+BOSS_ACCOUNTS: list = field(default_factory=lambda: [])
+ACCOUNT_SELECTION: str = "round_robin"  # round_robin | random | least_used
