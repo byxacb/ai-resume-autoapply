@@ -17,7 +17,7 @@
     </div>
     <div class="topbar-actions">
       <span id="health-status" class="badge badge-unknown">检查中...</span>
-      <button class="btn btn-ghost" onclick="refreshAll()">🔄 刷新</button>
+      <button class="btn btn-ghost" onclick="refreshAll()">🔄 刷新</button><button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()">🌓</button>
     </div>
   </header>
 
@@ -91,6 +91,8 @@
             <tbody>
               <tr><td colspan="5" class="empty">加载中...</td></tr>
             </tbody>
+          <div class="pagination" id="queue-pagination"></div>
+          <div class="pagination" id="recent-pagination"></div>
           </table>
         </div>
       </div>

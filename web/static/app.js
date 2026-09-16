@@ -606,3 +606,44 @@ async function submitBossApply() {
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+window.__recentPage = 1;
+window.__recentPageSize = 10;
+window.__queuePage = 1;
+window.__queuePageSize = 10;
+function paginate(containerId, total, page, pageSize, renderFn) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  page = Math.min(page, totalPages);
+  renderFn(page);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  const prev = document.createElement('button');
+  prev.textContent = '上一页';
+  prev.disabled = page <= 1;
+  prev.onclick = () => { if (page > 1) { window[containerId] = page - 1; refreshRecent(); if (containerId === 'queue-pagination') refreshQueue(); } };
+  el.appendChild(prev);
+  const info = document.createElement('span');
+  info.style.margin = '0 8px';
+  info.textContent = page + ' / ' + totalPages;
+  el.appendChild(info);
+  const next = document.createElement('button');
+  next.textContent = '下一页';
+  next.disabled = page >= totalPages;
+  next.onclick = () => { if (page < totalPages) { window[containerId] = page + 1; refreshRecent(); if (containerId === 'queue-pagination') refreshQueue(); } };
+  el.appendChild(next);
+}
+function renderRecentTable(jobs) {
+  // existing logic will be wrapped by pagination in caller if needed
+}

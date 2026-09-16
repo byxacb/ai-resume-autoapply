@@ -368,3 +368,61 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px;}
 .chart-card{background:#fff;border:1px solid #e1e4e8;border-radius:12px;padding:12px;}
 .chart-card canvas{width:100% !important;height:220px !important;}
+
+/* === Dark Mode === */
+[data-theme="dark"] {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .topbar {
+  background: linear-gradient(135deg, #312e81 0%, #4c1d95 100%);
+}
+[data-theme="dark"] .tabs { background: #1e293b; border-bottom-color: #334155; }
+[data-theme="dark"] .tab { color: #94a3b8; }
+[data-theme="dark"] .tab:hover { background: #1e293b; color: #e2e8f0; }
+[data-theme="dark"] .tab.active { color: #a5b4fc; border-bottom-color: #a5b4fc; }
+[data-theme="dark"] .card { background: #1e293b; border: 1px solid #334155; box-shadow: none; }
+[data-theme="dark"] .card-header { border-bottom-color: #334155; }
+[data-theme="dark"] .kpi-card { background: #1e293b; border: 1px solid #334155; }
+[data-theme="dark"] .kpi-label { color: #94a3b8; }
+[data-theme="dark"] .kpi-value { color: #f8fafc; }
+[data-theme="dark"] .table th { background: #0f172a; color: #94a3b8; border-bottom-color: #334155; }
+[data-theme="dark"] .table td { border-bottom-color: #334155; color: #e2e8f0; }
+[data-theme="dark"] .table tbody tr:hover { background: #334155; }
+[data-theme="dark"] .config-row { background: #0f172a; }
+[data-theme="dark"] .config-key { color: #94a3b8; }
+[data-theme="dark"] .config-val { color: #f8fafc; }
+[data-theme="dark"] .metrics-pre { background: #0f172a; color: #e2e8f0; }
+[data-theme="dark"] .metric-card { background: #0f172a; border: 1px solid #334155; }
+[data-theme="dark"] .logs { background: #0b0f19; color: #e2e8f0; }
+
+/* === Pagination === */
+.pagination {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #374151;
+}
+.pagination button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: white;
+  cursor: pointer;
+}
+[data-theme="dark"] .pagination button { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+.pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* === Mobile === */
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .tabs { padding: 0 8px; }
+  .tab { padding: 10px 8px; font-size: 12px; }
+  main { padding: 12px; }
+  .table-toolbar { flex-direction: column; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .modal-content { width: 95vw; }
+}
