@@ -42,7 +42,7 @@ function scoreClass(score) {
 
 function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({
-    '&': '&', '<': '<', '>': '>', '"': '"', "'": '''
+    '&': '&', '<': '<', '>': '>', '"': '"', "'": '"'
   }[c]));
 }
 
