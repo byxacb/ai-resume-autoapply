@@ -299,7 +299,7 @@ async function refreshQueue() {
   try {
     const search = encodeURIComponent(document.getElementById('queue-search')?.value || '');
     const status = encodeURIComponent(document.getElementById('queue-status-filter')?.value || '');
-    const url = '/queue/pending?limit=50&search=' + search + '&status=' + status;
+    const url = '/queue/search?limit=50&search=' + search + '&status=' + status;
     const data = await api(url);
     const tbody = document.querySelector('#queue-table tbody');
     if (!data.jobs || data.jobs.length === 0) {
