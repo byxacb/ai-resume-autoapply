@@ -362,12 +362,43 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
     years_experience=int(candidate.get("years") or 0),
     resume_pdf_path=req.get("resume_path") or resume_id,
   )
+  used_real = False
+  try:
+      auto_job_dir = Path(__file__).resolve().parent.parent.parent / "auto_job" / "auto_job_find"
+      if auto_job_dir.exists():
+          import sys as _sys
+          if str(auto_job_dir) not in _sys.path:
+              _sys.path.insert(0, str(auto_job_dir))
+          from finding_jobs_v2 import open_browser_with_stealth, wait_for_login, click_chat_button, send_message_to_chat_box
+          from prompts_v2 import build_cover_letter_prompt
+          base_url = "https://www.zhipin.com/web/geek/job-recommend?ka=header-job-recommend"
+          target_url = f"https://www.zhipin.com/gongsi/job/{boss_job_id}.html" if boss_job_id else base_url
+          driver = open_browser_with_stealth(target_url)
+          wait_for_login(180)
+          prompt = build_cover_letter_prompt(
+              candidate_name=candidate.get("name") or "求职者",
+              candidate_title=candidate.get("title") or "",
+              years_experience=int(candidate.get("years") or 0),
+              matched_skills=[candidate.get("top_skill") or "相关技术栈"],
+              missing_skills=[],
+              ats_score=78.0,
+              job_description=jd_text or "",
+          )
+          sent = False
+          if click_chat_button():
+              send_message_to_chat_box(prompt)
+              sent = True
+          job.cover_letter = prompt if sent else ""
+          job.status = "sent" if sent else "queued"
+          used_real = True
+  except Exception:
+      used_real = False
   q = make_queue()
   q.push(job)
-  metrics.JOBS_PROCESSED.labels(result="queued").inc()
+  metrics.JOBS_PROCESSED.labels(result=job.status).inc()
   metrics.INFLIGHT_RUNS.inc()
   background_tasks.add_task(_run_in_background, run_id, job.resume_pdf_path, [{"company": job.company, "title": job.title, "jd_text": jd_text}], candidate, max_jobs)
-  return {"status": "queued", "run_id": run_id, "job_id": job.job_id}
+  return {"status": job.status, "run_id": run_id, "job_id": job.job_id}
 
 @app.get("/boss/apply/{run_id}/result")
 async def boss_apply_result(run_id: str):
