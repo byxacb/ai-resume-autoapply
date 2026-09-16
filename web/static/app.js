@@ -1100,3 +1100,18 @@ async function loadQueueStats() {
     console.error('loadQueueStats failed', e);
   }
 }
+
+async function clearQueue() {
+  try {
+    const res = await fetch('/queue/clear', { method: 'POST' });
+    if (res.ok) {
+      showToast('队列已清空', 'success');
+      refreshQueue();
+      loadQueueStats();
+    } else {
+      showToast('清空失败', 'error');
+    }
+  } catch (e) {
+    showToast('清空失败: ' + e.message, 'error');
+  }
+}
