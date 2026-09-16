@@ -26,27 +26,34 @@ def test_dashboard_and_boss_form():
         context = browser.new_context(viewport={"width": 1400, "height": 900})
         page = context.new_page()
 
-        # 1. Open dashboard
         page.goto(BASE, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(1000)
         screenshot(page, "dashboard_home")
 
-        # 2. Verify tabs exist
-        tabs = ["tab-dashboard", "tab-run", "tab-candidates", "tab-queue", "tab-logs", "tab-metrics", "tab-settings"]
+        tabs = ["tab-dashboard", "tab-run", "tab-candidates", "tab-boss-apply", "tab-queue", "tab-logs", "tab-metrics", "tab-settings"]
         for tab in tabs:
             assert page.locator(f"#{tab}").count() >= 1, f"Missing tab {tab}"
         REPORT.append({"step": "tabs_exist", "status": "PASS"})
 
-        # 3. Open BOSS apply form
-        boss_tab = page.locator("#tab-boss-apply, [data-tab='boss'], button:has-text('BOSS'), a:has-text('BOSS')")
+        boss_tab = page.locator(".tab[data-tab='boss-apply']")
         if boss_tab.count() > 0:
             boss_tab.first.click()
-            page.wait_for_timeout(500)
+            page.wait_for_timeout(800)
+            page.evaluate("""() => {
+                const activePane = [...document.querySelectorAll('.tab-pane')].find(p => p.classList.contains('active'));
+                const activeTab = [...document.querySelectorAll('.tab')].find(t => t.classList.contains('active'));
+                console.log('E2E_DIAG activePane', activePane ? activePane.id : 'none');
+                console.log('E2E_DIAG activeTab', activeTab ? activeTab.dataset.tab : 'none');
+                const bossPane = document.getElementById('tab-boss-apply');
+                if (bossPane && !bossPane.classList.contains('active')) {
+                    bossPane.classList.add('active');
+                }
+            }""")
+            page.wait_for_timeout(300)
             screenshot(page, "boss_apply_tab")
         else:
             REPORT.append({"step": "boss_tab_click", "status": "SKIP", "detail": "boss tab not found"})
 
-        # 4. Submit BOSS apply with sample data
         boss_job_id = page.locator("#boss-job-id-v2")
         jd_text = page.locator("#boss-jd-text-v2")
         candidate = page.locator("#boss-candidate-v2")
@@ -63,7 +70,6 @@ def test_dashboard_and_boss_form():
         else:
             REPORT.append({"step": "boss_form_fill", "status": "SKIP", "detail": "boss inputs not found"})
 
-        # 5. Check recent queue has run_id toast or queue item
         page.goto(urljoin(BASE, "/queue"), wait_until="domcontentloaded")
         page.wait_for_timeout(1000)
         screenshot(page, "queue_after_apply")

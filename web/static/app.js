@@ -902,3 +902,4 @@ setTimeout(async () => {
   const data = await api("/candidates").catch(() => ({ candidates: [] }));
   sel.innerHTML = '<option value="">-- 选择候选人 --</option>' + (data.candidates || []).map(c => "<option value="" + c.id + "">" + escapeHtml(c.name) + " (" + escapeHtml(c.title) + ")</option>").join("");
 }, 500);
+
