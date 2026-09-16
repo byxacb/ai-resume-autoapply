@@ -339,6 +339,36 @@ async def _run_in_background(run_id, resume_path, jd_list, candidate, max_jobs):
     webhooks.notify_run_complete(summary)
 
 
+@app.post("/boss/apply")
+async def boss_apply(req: dict, background_tasks: BackgroundTasks):
+  boss_job_id = (req.get("boss_job_id") or "").strip()
+  jd_text = req.get("jd_text") or ""
+  cover_letter = req.get("cover_letter") or ""
+  resume_id = req.get("resume_id") or ""
+  candidate = req.get("candidate") or {}
+  max_jobs = int(req.get("max_jobs") or 1)
+  run_id = uuid.uuid4().hex[:12]
+  if not boss_job_id and not jd_text:
+    raise HTTPException(400, "Provide boss_job_id or jd_text")
+  job = ApplyJob(
+    job_id=run_id,
+    boss_job_id=boss_job_id,
+    company=candidate.get("company") or "未知公司",
+    title=candidate.get("title") or "BOSS职位",
+    jd_text=jd_text,
+    cover_letter=cover_letter,
+    candidate_name=candidate.get("name") or "求职者",
+    candidate_title=candidate.get("title") or "",
+    years_experience=int(candidate.get("years") or 0),
+    resume_pdf_path=req.get("resume_path") or resume_id,
+  )
+  q = make_queue()
+  q.push(job)
+  metrics.JOBS_PROCESSED.labels(result="queued").inc()
+  metrics.INFLIGHT_RUNS.inc()
+  background_tasks.add_task(_run_in_background, run_id, job.resume_pdf_path, [{"company": job.company, "title": job.title, "jd_text": jd_text}], candidate, max_jobs)
+  return {"status": "queued", "run_id": run_id, "job_id": job.job_id}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

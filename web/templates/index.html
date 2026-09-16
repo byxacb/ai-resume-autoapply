@@ -213,6 +213,33 @@
       </div>
     </section>
 
+          <div class="card">
+        <div class="card-header">
+          <h2>BOSS 直聘投递</h2>
+        </div>
+        <div class="card-body">
+          <form id="boss-apply-form" class="form">
+            <div class="form-row">
+              <label>候选人</label>
+              <select id="boss-candidate" required>
+                <option value="">-- 选择候选人 --</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>BOSS Job ID / 职位链接 ID</label>
+              <input type="text" id="boss-job-id" placeholder="例如 123456789" />
+            </div>
+            <div class="form-row">
+              <label>JD 文本</label>
+              <textarea id="boss-jd-text" rows="6" placeholder="粘贴职位描述，或留空自动抓取"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">投递到队列</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
     <!-- ============ Queue ============ -->
     <section id="tab-queue" class="tab-pane">
       <div class="card">

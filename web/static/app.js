@@ -568,3 +568,41 @@ async function refreshMetrics() {
     updateChart(chartThroughput, "Jobs processed", Number(data["ai_resume_jobs_processed_total"]) || 0);
   } catch (e) { console.error(e); }
 }
+
+async function submitBossApply() {
+  const bossJobId = document.getElementById('boss-job-id')?.value?.trim() || '';
+  const jdText = document.getElementById('boss-jd-text')?.value?.trim() || '';
+  const candidateId = document.getElementById('run-candidate')?.value;
+  if (!bossJobId && !jdText) { alert('请输入 BOSS 职位 ID 或 JD 文本'); return; }
+  try {
+    const candResp = await api('/candidates');
+    const cand = (candResp.candidates || []).find(c => c.id === candidateId);
+    const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years, company: '' } : { name: '求职者', title: '', years: 0 };
+    const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
+    const data = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
+    alert('投递任务已进入队列：run_id=' + data.run_id);
+    refreshQueue();
+  } catch (e) {
+    alert('投递失败：' + e.message);
+  }
+}
+document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
+
+async function submitBossApply() {
+  const bossJobId = document.getElementById('boss-job-id')?.value?.trim() || '';
+  const jdText = document.getElementById('boss-jd-text')?.value?.trim() || '';
+  const candidateId = document.getElementById('run-candidate')?.value;
+  if (!bossJobId && !jdText) { alert('请输入 BOSS 职位 ID 或 JD 文本'); return; }
+  try {
+    const candResp = await api('/candidates');
+    const cand = (candResp.candidates || []).find(c => c.id === candidateId);
+    const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years, company: '' } : { name: '求职者', title: '', years: 0 };
+    const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
+    const data = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
+    alert('投递任务已进入队列：run_id=' + data.run_id);
+    refreshQueue();
+  } catch (e) {
+    alert('投递失败：' + e.message);
+  }
+}
+document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
