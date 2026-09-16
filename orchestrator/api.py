@@ -243,10 +243,11 @@ async def queue_search(limit: int = 50, search: str = "", status: str = ""):
         # Filter by search
         if search:
             search_lower = search.lower()
-            all_jobs = [j for j in all_jobs if 
-                (j.job_id or '').lower().find(search_lower) >= 0 or
-                (j.company or '').lower().find(search_lower) >= 0 or
-                (j.title or '').lower().find(search_lower) >= 0]
+            searchable_fields = ['job_id', 'company', 'title', 'jd_text', 'boss_job_id', 'candidate_name', 'cover_letter']
+            all_jobs = [j for j in all_jobs if any(
+                (getattr(j, field, '') or '').lower().find(search_lower) >= 0 
+                for field in searchable_fields
+            )]
         
         # Filter by status
         if status:
@@ -592,7 +593,7 @@ async def boss_apply_recent(limit: int = 20):
   if hasattr(q, "recent"):
     for j in q.recent(limit=limit):
       item = {"run_id": j.get("job_id"), "status": j.get("status"), "company": j.get("company"), "title": j.get("title"), "boss_job_id": j.get("boss_job_id", ""), "created_at": j.get("created_at")}
-      for k in ["account_session_dir", "session_dir", "account_label", "cover_letter"]:
+      for k in ["account_session_dir", "session_dir", "account_label", "cover_letter", "jd_text", "boss_job_id", "candidate_name"]:
         if k in j:
           item[k] = j[k]
       out.append(item)
