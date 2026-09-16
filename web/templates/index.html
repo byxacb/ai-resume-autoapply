@@ -6,6 +6,7 @@
   <title>AI 简历助手 · 控制台</title>
   <link rel="stylesheet" href="/static/style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -71,7 +72,17 @@
           <button class="btn btn-sm" onclick="refreshRecent()">刷新</button>
         </div>
         <div class="card-body">
-          <table class="table" id="recent-table">
+                    <div class="table-toolbar">
+            <input type="text" id="recent-search" placeholder="搜索 公司/职位..." />
+            <select id="recent-filter">
+              <option value="">全部状态</option>
+              <option value="completed">completed</option>
+              <option value="failed">failed</option>
+              <option value="processing">processing</option>
+            </select>
+            <button class="sort-btn" data-sort="recent" data-key="ats_score">按分数排序</button>
+          </div>
+<table class="table" id="recent-table">
             <thead>
               <tr>
                 <th>时间</th><th>公司</th><th>职位</th><th>分数</th><th>状态</th>
@@ -210,7 +221,11 @@
           <button class="btn btn-sm" onclick="refreshQueue()">刷新</button>
         </div>
         <div class="card-body">
-          <table class="table" id="queue-table">
+                    <div class="table-toolbar">
+            <input type="text" id="queue-search" placeholder="搜索 公司/职位..." />
+            <button class="sort-btn" data-sort="queue" data-key="ats_score">按分数排序</button>
+          </div>
+<table class="table" id="queue-table">
             <thead>
               <tr>
                 <th>Job ID</th><th>公司</th><th>职位</th><th>分数</th><th>创建时间</th>
@@ -274,7 +289,17 @@
               <div class="metric-value" id="m-llm-tokens">—</div>
             </div>
           </div>
-          <pre class="metrics-pre" id="metrics-raw">加载中...</pre>
+                    <div class="chart-grid">
+            <div class="chart-card">
+              <div class="card-header" style="padding:0 0 8px 0"><h2>队列大小趋势</h2></div>
+              <canvas id="chart-queue"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="card-header" style="padding:0 0 8px 0"><h2>任务吞吐</h2></div>
+              <canvas id="chart-throughput"></canvas>
+            </div>
+          </div>
+<pre class="metrics-pre" id="metrics-raw" style="margin-top:16px">加载中...</pre>
         </div>
       </div>
     </section>

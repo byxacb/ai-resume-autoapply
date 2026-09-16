@@ -501,3 +501,70 @@ function wireJobTable(tableId) {
     } catch (err) { console.error(err); }
   });
 }
+
+.width || 300;
+  canvas.height = 180;
+  const w = canvas.width, h = canvas.height;
+  const max = Math.max(...points.map(p => p.v)) || 1;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = "#4f46e5";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const step = w / (points.length - 1 || 1);
+  points.forEach((p, i) => {
+    const x = i * step;
+    const y = h - (p.v / max) * (h - 20) - 10;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.fillStyle = "#374151";
+  ctx.font = "12px sans-serif";
+  ctx.fillText(label + " (last " + points.length + " samples)", 8, 16);
+}
+
+// === Chart.js Metrics ===
+let chartQueue = null;
+let chartThroughput = null;
+
+function ensureChart(id, label) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (!window.Chart) return null;
+  const ctx = el.getContext("2d");
+  return new Chart(ctx, {
+    type: "line",
+    data: { labels: [], datasets: [{ label: label, data: [], borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.15)", fill: true, tension: 0.3, pointRadius: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { beginAtZero: false } }, plugins: { legend: { display: false } } }
+  });
+}
+
+function updateChart(chart, label, value) {
+  if (!chart) return;
+  chart.data.labels.push(new Date().toLocaleTimeString());
+  chart.data.datasets[0].data.push(value);
+  if (chart.data.labels.length > 60) chart.data.labels.shift();
+  if (chart.data.datasets[0].data.length > 60) chart.data.datasets[0].data.shift();
+  chart.update("none");
+}
+
+async function refreshMetrics() {
+  try {
+    const r = await fetch("/metrics");
+    const text = await r.text();
+    const data = parsePrometheus(text);
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v ?? "—"; };
+    set("m-queue-size", data["ai_resume_queue_size"]);
+    set("m-jobs-processed", data["ai_resume_jobs_processed_total"]);
+    set("m-total-runs", data["ai_resume_runs_total"]);
+    set("m-candidates", data["ai_resume_candidates_total"]);
+    set("m-inflight", data["ai_resume_inflight_runs"]);
+    set("m-llm-tokens", data["ai_resume_llm_tokens_total"]);
+    const raw = document.getElementById("metrics-raw");
+    if (raw) raw.textContent = text;
+
+    if (!chartQueue && window.Chart) chartQueue = ensureChart("chart-queue", "Queue size");
+    if (!chartThroughput && window.Chart) chartThroughput = ensureChart("chart-throughput", "Jobs processed");
+    updateChart(chartQueue, "Queue size", Number(data["ai_resume_queue_size"]) || 0);
+    updateChart(chartThroughput, "Jobs processed", Number(data["ai_resume_jobs_processed_total"]) || 0);
+  } catch (e) { console.error(e); }
+}

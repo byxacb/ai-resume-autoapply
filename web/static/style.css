@@ -358,3 +358,13 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .upload-progress-bar{height:100%;background:#4f46e5;width:0%;transition:width .2s;}
 .upload-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f9fafb;border-radius:8px;margin-top:8px;}
 .upload-item .name{flex:1;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* === Table toolbar === */
+.table-toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.table-toolbar input[type="text"]{flex:1;min-width:180px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;}
+.table-toolbar select{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;}
+.sort-btn{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;}
+.sort-btn:hover{background:#e5e7eb;}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px;}
+.chart-card{background:#fff;border:1px solid #e1e4e8;border-radius:12px;padding:12px;}
+.chart-card canvas{width:100% !important;height:220px !important;}
