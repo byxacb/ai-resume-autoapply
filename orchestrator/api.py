@@ -223,6 +223,41 @@ async def queue_stats():
         }
     return {"stats": stats}
 
+@app.get("/queue/search")
+async def queue_search(limit: int = 50, search: str = "", status: str = ""):
+    q = make_queue()
+    jobs = []
+    if hasattr(q, "search"):
+        jobs = q.search(limit=limit, search=search, status=status)
+    elif hasattr(q, "_pending"):
+        all_jobs = []
+        for attr in ["_pending", "_processing", "_completed", "_failed"]:
+            if hasattr(q, attr):
+                container = getattr(q, attr)
+                if isinstance(container, dict):
+                    for job in container.values():
+                        all_jobs.append(job)
+                else:
+                    all_jobs.extend(container)
+        
+        # Filter by search
+        if search:
+            search_lower = search.lower()
+            all_jobs = [j for j in all_jobs if 
+                (j.job_id or '').lower().find(search_lower) >= 0 or
+                (j.company or '').lower().find(search_lower) >= 0 or
+                (j.title or '').lower().find(search_lower) >= 0]
+        
+        # Filter by status
+        if status:
+            status_map = {"queued": "queued", "processing": "processing", "completed": "completed", "failed": "failed"}
+            mapped = status_map.get(status, status)
+            all_jobs = [j for j in all_jobs if getattr(j, 'status', '') == mapped]
+        
+        jobs = all_jobs[: max(1, limit)]
+    
+    return {"jobs": [asdict(job) if hasattr(job, "__dataclass_fields__") else job for job in jobs]}
+
 @app.get("/queue/pending")
 async def queue_pending(limit: int = 50):
     queue = make_queue()

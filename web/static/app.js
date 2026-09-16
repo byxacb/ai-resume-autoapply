@@ -297,7 +297,10 @@ function showRunResult(msg, kind) {
 // === Queue ===
 async function refreshQueue() {
   try {
-    const data = await api('/queue/pending?limit=50');
+    const search = encodeURIComponent(document.getElementById('queue-search')?.value || '');
+    const status = encodeURIComponent(document.getElementById('queue-status-filter')?.value || '');
+    const url = '/queue/pending?limit=50&search=' + search + '&status=' + status;
+    const data = await api(url);
     const tbody = document.querySelector('#queue-table tbody');
     if (!data.jobs || data.jobs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" class="empty">队列为空</td></tr>';
