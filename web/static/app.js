@@ -1005,3 +1005,4 @@ async function renderBossApplyRecent() {
     list.innerHTML = '<div class="empty">加载失败: ' + escapeHtml(e.message) + '</div>';
   }
 }
+\nasync function fetchBossAccounts() {\n  const sel = document.getElementById('boss-account-select');\n  if (!sel) return;\n  try {\n    const data = await api('/boss/accounts');\n    const accounts = Array.isArray(data.accounts) ? data.accounts : [];\n    accounts.forEach(function(acc, idx) {\n      const opt = document.createElement('option');\n      opt.value = String(idx);\n      opt.textContent = acc.label || ('账号 ' + (idx + 1));\n      sel.appendChild(opt);\n    });\n  } catch (e) {\n    // ignore accounts unavailable\n  }\n}\nfunction getSelectedBossAccount() {\n  const sel = document.getElementById('boss-account-select');\n  if (!sel || !sel.value) return null;\n  return { idx: Number(sel.value), label: sel.options[sel.selectedIndex]?.textContent || '' };\n}\n

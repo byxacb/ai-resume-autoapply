@@ -339,6 +339,17 @@ async def _run_in_background(run_id, resume_path, jd_list, candidate, max_jobs):
     webhooks.notify_run_complete(summary)
 
 
+@app.get("/boss/accounts")
+async def boss_accounts():
+  accounts = []
+  try:
+    from finding_jobs_v2 import load_boss_accounts
+    accounts = load_boss_accounts() or []
+  except Exception:
+    accounts = []
+  return {"accounts": accounts}
+
+
 @app.post("/boss/apply")
 async def boss_apply(req: dict, background_tasks: BackgroundTasks):
   boss_job_id = (req.get("boss_job_id") or "").strip()
