@@ -1048,3 +1048,25 @@ document.addEventListener('click', (ev) => {
   const removeBtn = ev.target.closest('[data-action="queue-remove"]');
   if (removeBtn && removeBtn.dataset.jobId) removeJob(removeBtn.dataset.jobId);
 });
+
+async function runPrecheck() {
+  const container = document.getElementById('precheck-results');
+  if (!container) return;
+  container.innerHTML = '<div class="precheck-item">检查中...</div>';
+  try {
+    const data = await api('/precheck');
+    const items = [
+      { label: '浏览器/ChromeDriver', ok: data.browser_available },
+      { label: '队列系统', ok: data.queue_available },
+      { label: 'BOSS 账号配置', ok: (data.boss_accounts_count || 0) > 0 },
+      { label: '匹配分数线', ok: (data.min_match_score || 0) >= 0 },
+    ];
+    container.innerHTML = items.map(it => {
+      const cls = it.ok ? 'pass' : 'fail';
+      const icon = it.ok ? '✅' : '❌';
+      return '<div class="precheck-item ' + cls + '"><span class="precheck-icon">' + icon + '</span><span>' + escapeHtml(it.label) + '</span></div>';
+    }).join('');
+  } catch (e) {
+    container.innerHTML = '<div class="precheck-item fail">检查失败: ' + escapeHtml(e.message) + '</div>';
+  }
+}

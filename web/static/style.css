@@ -437,3 +437,10 @@ main { padding: 24px; max-width: 1400px; margin: 0 auto; }
 .drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .code-block { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 10px; white-space: pre-wrap; }
 .kv > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+.precheck-list { display: grid; gap: 10px; }
+.precheck-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); }
+.precheck-item.pass { border-color: #22c55e; }
+.precheck-item.fail { border-color: #ef4444; }
+.precheck-icon { font-size: 18px; }
+  

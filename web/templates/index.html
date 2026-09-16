@@ -30,7 +30,7 @@
     <button class="tab" data-tab="metrics">📈 监控</button>
     <button class="tab" data-tab="boss-apply">💼 BOSS 投递</button>
     <button class="tab" data-tab="settings">⚙️ 配置</button>
-  </nav>
+  <button class="tab" data-tab="precheck">🔍 前置检查</button></nav>
 
   <main>
     <!-- ============ Dashboard ============ -->
@@ -399,6 +399,16 @@
         </div>
         <div class="card-body">
           <pre class="config-pre" id="settings-json">加载中...</pre>
+        </div>
+      </div>
+    </section>
+  
+    <section id="tab-precheck" class="tab-pane">
+      <div class="card">
+        <div class="card-header"><h2>系统前置检查</h2></div>
+        <div class="card-body">
+          <div id="precheck-results" class="precheck-list"></div>
+          <button class="btn" onclick="runPrecheck()">刷新检查</button>
         </div>
       </div>
     </section>

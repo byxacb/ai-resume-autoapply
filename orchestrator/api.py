@@ -99,6 +99,33 @@ class CandidateResponse(BaseModel):
     resume_path: str
 
 
+
+@app.get("/precheck")
+async def precheck():
+    browser_available = False
+    try:
+        from finding_jobs_v2 import get_driver
+        browser_available = get_driver() is not None
+    except Exception:
+        browser_available = False
+
+    queue_available = False
+    try:
+        q = make_queue()
+        queue_available = q is not None
+    except Exception:
+        queue_available = False
+
+    return {
+        "browser_available": browser_available,
+        "queue_available": queue_available,
+        "boss_accounts_count": len(getattr(CONFIG, "BOSS_ACCOUNTS", [])),
+        "min_match_score": CONFIG.matcher.min_match_score,
+        "max_per_hour": CONFIG.antiban.max_apply_per_hour,
+        "max_per_day": CONFIG.antiban.max_apply_per_day,
+    }
+
+
 @app.get("/health")
 async def health():
     return {
