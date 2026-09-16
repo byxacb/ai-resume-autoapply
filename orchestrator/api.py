@@ -379,6 +379,12 @@ async def boss_apply(req: dict, background_tasks: BackgroundTasks):
     years_experience=int(candidate.get("years") or 0),
     resume_pdf_path=req.get("resume_path") or resume_id,
   )
+  # push to queue so recent() sees it
+  q = make_queue()
+  try:
+      q.push(job)
+  except Exception:
+      pass
   used_real = False
   try:
       auto_job_dir = Path(__file__).resolve().parent.parent.parent / "auto_job" / "auto_job_find"
