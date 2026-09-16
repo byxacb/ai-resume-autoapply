@@ -346,8 +346,14 @@ async def boss_accounts():
     from finding_jobs_v2 import load_boss_accounts
     accounts = load_boss_accounts() or []
   except Exception:
-    accounts = []
-  return {"accounts": accounts}
+    accounts = [{"label": "默认账号", "session_dir": "/tmp/boss_chrome_session"}]
+  sanitized = []
+  for idx, acc in enumerate(accounts):
+    sanitized.append({
+      "label": acc.get("label") or ("账号 " + str(idx + 1)),
+      "session_dir": acc.get("session_dir") or ("/tmp/boss_chrome_session_" + str(idx))
+    })
+  return {"accounts": sanitized}
 
 
 @app.post("/boss/apply")
