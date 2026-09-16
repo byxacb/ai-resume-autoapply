@@ -291,3 +291,10 @@ BOSS_APPLY_BACKOFF_MAX: float = 60.0
 MULTI_ACCOUNT_ENABLED: bool = False
 BOSS_ACCOUNTS: list = field(default_factory=lambda: [])
 ACCOUNT_SELECTION: str = "round_robin"  # round_robin | random | least_used
+
+
+# Example multi-account config:
+# BOSS_ACCOUNTS = [
+#   {"label": "主账号", "session_dir": "/tmp/boss_chrome_session_1"},
+#   {"label": "副账号", "session_dir": "/tmp/boss_chrome_session_2"},
+# ]
