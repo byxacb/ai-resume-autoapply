@@ -67,6 +67,15 @@ def test_dashboard_and_boss_form():
             submit.click()
             page.wait_for_timeout(2000)
             screenshot(page, "boss_apply_submitted")
+            # account selector screenshot if present
+            const accountSel = page.locator("#boss-account-select");
+            if (accountSel.count() > 0) {
+                screenshot(page, "boss_account_selector")
+            }
+            # BOSS recent/queue screenshot
+            page.goto(urljoin(BASE, "/boss-batch"), wait_until="domcontentloaded")
+            page.wait_for_timeout(1000)
+            screenshot(page, "boss_batch_after_apply")
         else:
             REPORT.append({"step": "boss_form_fill", "status": "SKIP", "detail": "boss inputs not found"})
 
