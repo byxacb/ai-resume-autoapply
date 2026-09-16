@@ -18,16 +18,49 @@ document.querySelectorAll('.tab').forEach(t => {
 });
 
 // === Helpers ===
-async function api(path, opts = {}) {
-  const resp = await fetch(API + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`HTTP ${resp.status}: ${text}`);
+let _traceCounter = 0;
+function traceRequest(key) {
+  _traceCounter += 1;
+  const id = _traceCounter;
+  const el = document.getElementById('trace-log');
+  if (el) {
+    const row = document.createElement('div');
+    row.className = 'trace-row';
+    row.dataset.id = id;
+    row.dataset.key = key;
+    row.innerHTML = '<span class="ts">' + new Date().toLocaleTimeString() + '</span> <b>' + escapeHtml(key) + '</b> <span class="trace-status">⏳</span>';
+    el.appendChild(row);
+    el.scrollTop = el.scrollHeight;
   }
-  return resp.json();
+  return id;
+}
+function traceSuccess(id, msg) {
+  const row = document.querySelector('.trace-row[data-id="' + id + '"]');
+  if (row) row.querySelector('.trace-status').textContent = '✅ ' + (msg || 'success');
+}
+function traceFail(id, msg) {
+  const row = document.querySelector('.trace-row[data-id="' + id + '"]');
+  if (row) row.querySelector('.trace-status').textContent = '❌ ' + (msg || 'failed');
+}
+async function api(path, opts = {}) {
+  const id = traceRequest(path);
+  try {
+    const resp = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opts,
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      traceFail(id, 'HTTP ' + resp.status);
+      throw new Error(`HTTP ${resp.status}: ${text}`);
+    }
+    const data = await resp.json();
+    traceSuccess(id);
+    return data;
+  } catch (e) {
+    traceFail(id, e.message);
+    throw e;
+  }
 }
 
 function fmt(n) {
