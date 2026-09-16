@@ -201,6 +201,38 @@ class InMemoryQueue:
                         return True
         return False
 
+    def search(self, limit: int = 50, search: str = "", status: str = "") -> list:
+        all_jobs = []
+        for attr in ["_pending", "_processing", "_completed", "_failed"]:
+            container = getattr(self, attr, [])
+            if isinstance(container, dict):
+                all_jobs.extend(container.values())
+            else:
+                all_jobs.extend(container)
+
+        if search:
+            search_lower = search.lower()
+            searchable_fields = ['job_id', 'company', 'title', 'jd_text', 'boss_job_id', 'candidate_name', 'cover_letter']
+            all_jobs = [j for j in all_jobs if any(
+                (getattr(j, field, '') or '').lower().find(search_lower) >= 0
+                for field in searchable_fields
+            )]
+
+        if status:
+            status_map = {"queued": "queued", "processing": "processing", "completed": "completed", "failed": "failed"}
+            mapped = status_map.get(status, status)
+            all_jobs = [j for j in all_jobs if getattr(j, 'status', '') == mapped]
+
+        # deduplicate by job_id
+        seen = set()
+        deduped = []
+        for j in all_jobs:
+            jid = j.job_id if hasattr(j, "job_id") else j.get("job_id")
+            if jid and jid not in seen:
+                seen.add(jid)
+                deduped.append(j)
+        return deduped[: max(1, limit)]
+
 
     def recent(self, limit: int = 50) -> list:
         # include class-level recent first so pending/queued jobs don't get lost

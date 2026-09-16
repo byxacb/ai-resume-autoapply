@@ -82,6 +82,15 @@ def test_dashboard_and_boss_form():
         page.wait_for_timeout(1000)
         screenshot(page, "queue_after_apply")
 
+        
+        # failed tasks tab screenshot
+        page.goto(urljoin(BASE, "/queue"), wait_until="domcontentloaded")
+        page.wait_for_timeout(500)
+        failed_tab = page.locator('button[data-tab="failed"]')
+        if failed_tab.count() > 0:
+            failed_tab.click()
+            page.wait_for_timeout(500)
+            screenshot(page, "failed_tasks_tab")
         browser.close()
 
 

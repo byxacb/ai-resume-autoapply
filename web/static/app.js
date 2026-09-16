@@ -1144,7 +1144,7 @@ async function renderFailedTable() {
         '<td><code>' + jobId.slice(-12) + '</code></td>' +
         '<td>' + escapeHtml(j.company || '-') + '</td>' +
         '<td>' + escapeHtml(j.title || '-') + '</td>' +
-        '<td><span class="score-pill score-low">失败</span></td>' +
+        '<td><span class="score-pill score-low">失败</span></td>' +'<td class="error-cell">' + escapeHtml(j.error || j.error_message || '-') + '</td>'
         '<td>' + escapeHtml((j.created_at || '').slice(11, 19)) + '</td>' +
         '<td><button class="btn btn-sm" data-action="queue-retry" data-job-id="' + jobId + '">重试</button></td>' +
       '</tr>';
