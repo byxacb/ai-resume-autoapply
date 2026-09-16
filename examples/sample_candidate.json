@@ -1,0 +1,16 @@
+{
+  "name": "张三",
+  "title": "Python 开发工程师",
+  "years": 5,
+  "skills": [
+    "Python",
+    "FastAPI",
+    "SQLAlchemy",
+    "Docker",
+    "Redis"
+  ],
+  "contact": {
+    "email": "zhangsan@example.com",
+    "phone": "13800000000"
+  }
+}

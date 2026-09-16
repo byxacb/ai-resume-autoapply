@@ -1,0 +1,17 @@
+[
+  {
+    "company": "示例科技",
+    "title": "Python 后端工程师",
+    "jd_text": "负责后端服务开发，精通 Python、FastAPI、SQLAlchemy。"
+  },
+  {
+    "company": "示例金融",
+    "title": "全栈工程师",
+    "jd_text": "参与前后端开发，熟悉 React 与 Python。"
+  },
+  {
+    "company": "示例电商",
+    "title": "数据工程师",
+    "jd_text": "构建数据管道，熟悉 Spark、Airflow、Python。"
+  }
+]
