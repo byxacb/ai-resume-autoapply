@@ -500,6 +500,33 @@ def _pick_boss_account():
     _pick_boss_account._rr_index = (idx + 1) % len(accounts)
     return accounts[idx]
 
+@app.post("/boss/apply/batch")
+async def boss_apply_batch(req: dict, background_tasks: BackgroundTasks):
+  items = req.get("items") or []
+  candidate = req.get("candidate") or {}
+  max_jobs = int(req.get("max_jobs") or len(items))
+  run_id = uuid.uuid4().hex[:12]
+  q = make_queue()
+  results = []
+  for i, item in enumerate(items[:max_jobs]):
+      job = ApplyJob(
+          job_id=f"{run_id}_{i}",
+          boss_job_id=(item.get("boss_job_id") or "").strip(),
+          company=item.get("company") or candidate.get("company") or "未知公司",
+          title=item.get("title") or candidate.get("title") or "BOSS职位",
+          jd_text=item.get("jd_text") or "",
+          cover_letter=item.get("cover_letter") or "",
+          candidate_name=candidate.get("name") or "求职者",
+          candidate_title=candidate.get("title") or "",
+          years_experience=int(candidate.get("years") or 0),
+          resume_pdf_path=req.get("resume_path") or "",
+      )
+      q.push(job)
+      metrics.JOBS_PROCESSED.labels(result="queued").inc()
+      results.append({"job_id": job.job_id, "company": job.company, "title": job.title})
+  metrics.INFLIGHT_RUNS.inc()
+  return {"status": "queued", "run_id": run_id, "count": len(results), "jobs": results}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

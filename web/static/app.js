@@ -882,3 +882,23 @@ window.api = window.api || {};
 window.api.traceRequest = traceRequest;
 window.api.traceSuccess = traceSuccess;
 window.api.traceFail = traceFail;
+
+document.getElementById("boss-batch-form")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const candidateId = document.getElementById("boss-batch-candidate")?.value;
+  const raw = document.getElementById("boss-batch-items")?.value?.trim() || "[]";
+  let items = [];
+  try { items = JSON.parse(raw); } catch { showToast("JSON 格式错误", "error"); return; }
+  if (!items.length) { showToast("请填写职位列表", "warn"); return; }
+  const candResp = await api("/candidates");
+  const cand = (candResp.candidates || []).find(c => c.id === candidateId);
+  const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years } : { name: "求职者", title: "", years: 0 };
+  const res = await api("/boss/apply/batch", { method: "POST", body: JSON.stringify({ items, candidate, max_jobs: items.length }) });
+  showToast("批量投递完成：" + res.count + " 个任务，run_id=" + res.run_id, "success");
+});
+setTimeout(async () => {
+  const sel = document.getElementById("boss-batch-candidate");
+  if (!sel) return;
+  const data = await api("/candidates").catch(() => ({ candidates: [] }));
+  sel.innerHTML = '<option value="">-- 选择候选人 --</option>' + (data.candidates || []).map(c => "<option value="" + c.id + "">" + escapeHtml(c.name) + " (" + escapeHtml(c.title) + ")</option>").join("");
+}, 500);

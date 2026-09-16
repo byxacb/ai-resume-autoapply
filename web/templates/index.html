@@ -244,6 +244,28 @@
         </div>
       </div>
 
+        <!-- ============ Batch BOSS Apply ============ -->
+    <section id="tab-boss-batch" class="tab-pane">
+      <div class="card">
+        <div class="card-header"><h2>批量 BOSS 投递</h2></div>
+        <div class="card-body">
+          <form id="boss-batch-form" class="form">
+            <div class="form-row">
+              <label>候选人</label>
+              <select id="boss-batch-candidate" required><option value="">-- 选择候选人 --</option></select>
+            </div>
+            <div class="form-row">
+              <label>职位列表 (JSON)</label>
+              <textarea id="boss-batch-items" rows="10" placeholder='[{"boss_job_id":"123","company":"A","title":"Dev","jd_text":"..."}, ...]'></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">批量投递到队列</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ BOSS Apply ============ -->
     <section id="tab-boss-apply" class="tab-pane">
       <div class="card">
