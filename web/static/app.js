@@ -149,7 +149,7 @@ async function deleteCandidate(id) {
     await api('/candidate/' + id, { method: 'DELETE' });
     loadCandidates();
   } catch (e) {
-    alert('删除失败：' + e.message);
+    showToast('删除失败：' + e.message);
   }
 }
 
@@ -188,9 +188,9 @@ document.getElementById('candidate-form').addEventListener('submit', async e => 
     closeModal();
     e.target.reset();
     loadCandidates();
-    alert('候选人创建成功！');
+    showToast('候选人创建成功！');
   } catch (err) {
-    alert('创建失败：' + err.message);
+    showToast('创建失败：' + err.message);
   }
 });
 
@@ -214,7 +214,7 @@ document.getElementById('run-form').addEventListener('submit', async e => {
   // Get candidate
   const candResp = await api('/candidates');
   const cand = (candResp.candidates || []).find(c => c.id === candidateId);
-  if (!cand) { alert('请选择候选人'); return; }
+  if (!cand) { showToast('请选择候选人'); return; }
 
   let payload = {
     resume_path: cand.resume_path,
@@ -228,17 +228,17 @@ document.getElementById('run-form').addEventListener('submit', async e => {
   try {
     if (source === 'upload') {
       const file = document.getElementById('jd-file').files[0];
-      if (!file) { alert('请选择 JD 文件'); return; }
+      if (!file) { showToast('请选择 JD 文件'); return; }
       const text = await file.text();
       payload.jd_list = JSON.parse(text);
     } else if (source === 'paste') {
       const text = document.getElementById('jd-paste').value.trim();
-      if (!text) { alert('请粘贴 JD'); return; }
+      if (!text) { showToast('请粘贴 JD'); return; }
       payload.jd_list = JSON.parse(text);
     } else if (source === 'scrape') {
       const query = document.getElementById('scrape-query').value.trim();
       const city = document.getElementById('scrape-city').value;
-      if (!query) { alert('请输入关键词'); return; }
+      if (!query) { showToast('请输入关键词'); return; }
       payload.scrape = { query, city, max_jobs: max };
     }
 
@@ -573,17 +573,17 @@ async function submitBossApply() {
   const bossJobId = document.getElementById('boss-job-id')?.value?.trim() || '';
   const jdText = document.getElementById('boss-jd-text')?.value?.trim() || '';
   const candidateId = document.getElementById('run-candidate')?.value;
-  if (!bossJobId && !jdText) { alert('请输入 BOSS 职位 ID 或 JD 文本'); return; }
+  if (!bossJobId && !jdText) { showToast('请输入 BOSS 职位 ID 或 JD 文本'); return; }
   try {
     const candResp = await api('/candidates');
     const cand = (candResp.candidates || []).find(c => c.id === candidateId);
     const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years, company: '' } : { name: '求职者', title: '', years: 0 };
     const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
     const data = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
-    alert('投递任务已进入队列：run_id=' + data.run_id);
+    showToast('投递任务已进入队列：run_id=' + data.run_id);
     refreshQueue();
   } catch (e) {
-    alert('投递失败：' + e.message);
+    showToast('投递失败：' + e.message);
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
@@ -592,17 +592,17 @@ async function submitBossApply() {
   const bossJobId = document.getElementById('boss-job-id')?.value?.trim() || '';
   const jdText = document.getElementById('boss-jd-text')?.value?.trim() || '';
   const candidateId = document.getElementById('run-candidate')?.value;
-  if (!bossJobId && !jdText) { alert('请输入 BOSS 职位 ID 或 JD 文本'); return; }
+  if (!bossJobId && !jdText) { showToast('请输入 BOSS 职位 ID 或 JD 文本'); return; }
   try {
     const candResp = await api('/candidates');
     const cand = (candResp.candidates || []).find(c => c.id === candidateId);
     const candidate = cand ? { name: cand.name, title: cand.title, years: cand.years, company: '' } : { name: '求职者', title: '', years: 0 };
     const payload = { boss_job_id: bossJobId, jd_text: jdText, candidate, resume_path: cand?.resume_path || '', max_jobs: 1 };
     const data = await api('/boss/apply', { method: 'POST', body: JSON.stringify(payload) });
-    alert('投递任务已进入队列：run_id=' + data.run_id);
+    showToast('投递任务已进入队列：run_id=' + data.run_id);
     refreshQueue();
   } catch (e) {
-    alert('投递失败：' + e.message);
+    showToast('投递失败：' + e.message);
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
