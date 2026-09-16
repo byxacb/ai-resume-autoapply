@@ -744,3 +744,41 @@ async function submitBossApply() {
   }
 }
 document.getElementById('boss-apply-form')?.addEventListener('submit', (e) => { e.preventDefault(); submitBossApply(); });
+
+
+function renderQueueTable(jobs) {
+  const search = (document.getElementById('queue-search')?.value || '').toLowerCase();
+  const sortKey = window.__queueSortKey || 'created_at';
+  const sortDir = window.__queueSortDir || 'desc';
+  let list = jobs.slice();
+  if (search) list = list.filter(j => (j.company + j.title).toLowerCase().includes(search));
+  list.sort((a, b) => {
+    const av = a[sortKey] ?? 0;
+    const bv = b[sortKey] ?? 0;
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const tbody = document.querySelector('#queue-table tbody');
+  tbody.innerHTML = list.map(j => {
+    const ats = j.ats_score || 0;
+    const jobJson = escapeHtml(JSON.stringify(j));
+    return `<tr data-job="${jobJson}">
+      <td><code>${escapeHtml((j.job_id || '').slice(-12))}</code></td>
+      <td>${escapeHtml(j.company)}</td>
+      <td>${escapeHtml(j.title)}</td>
+      <td><span class="score-pill ${scoreClass(ats)}">${ats.toFixed(0)}</span></td>
+      <td>${escapeHtml((j.created_at || '').slice(11, 19))}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('queue-search')?.addEventListener('input', () => renderQueueTable(window.__queueJobs || []));
+document.querySelectorAll('[data-sort="queue"]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.key;
+    if (window.__queueSortKey === key) window.__queueSortDir = window.__queueSortDir === 'asc' ? 'desc' : 'asc';
+    else { window.__queueSortKey = key; window.__queueSortDir = 'desc'; }
+    renderQueueTable(window.__queueJobs || []);
+  });
+});
