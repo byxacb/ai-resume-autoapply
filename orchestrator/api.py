@@ -431,6 +431,9 @@ async def boss_apply_recent(limit: int = 20):
       out.append({"run_id": j.get("job_id"), "status": j.get("status"), "company": j.get("company"), "title": j.get("title"), "boss_job_id": j.get("boss_job_id", ""), "created_at": j.get("created_at")})
   return {"items": out}
 
+@app.get("/alerts/recent")
+async def alerts_recent(limit: int = 50):
+    return {"alerts": metric_alerts.recent(limit=limit)}
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -823,7 +823,6 @@ async function refreshBossRecent() {
 setInterval(refreshBossRecent, 5000);
 refreshBossRecent();
 
-let ws = null;
 let paused = false;
 function connectLogs() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
