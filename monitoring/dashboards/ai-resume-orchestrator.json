@@ -1,0 +1,102 @@
+{
+  "title": "AI Resume Orchestrator",
+  "uid": "ai-resume-orchestrator",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "id": 1,
+      "options": { "reduceOptions": { "values": false, "calcs": ["last"], "fields": "" } },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "expr": "ai_resume_queue_size",
+          "legendFormat": "Queue size",
+          "refId": "A"
+        }
+      ],
+      "title": "Queue Size",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "ai_resume_jobs_processed_total",
+          "legendFormat": "Jobs processed",
+          "refId": "A"
+        }
+      ],
+      "title": "Jobs Processed",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "ai_resume_runs_total",
+          "legendFormat": "Runs",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Runs",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "ai_resume_candidates_total",
+          "legendFormat": "Candidates",
+          "refId": "A"
+        }
+      ],
+      "title": "Candidates",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "rate(ai_resume_run_duration_seconds_sum[5m]) / rate(ai_resume_run_duration_seconds_count[5m])",
+          "legendFormat": "Avg duration (5m)",
+          "refId": "A"
+        }
+      ],
+      "title": "Run Duration",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "rate(ai_resume_jobs_processed_total[5m])",
+          "legendFormat": "jobs/sec",
+          "refId": "A"
+        }
+      ],
+      "title": "Jobs Throughput",
+      "type": "timeseries"
+    }
+  ]
+}
