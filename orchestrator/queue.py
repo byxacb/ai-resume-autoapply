@@ -129,6 +129,8 @@ class JobQueue:
 
 class InMemoryQueue:
     """简单的内存队列 fallback"""
+    _recent_list = []  # class-level so it survives restarts
+    _recent_max = 1000
 
     def __init__(self):
         self._pending = []
@@ -139,6 +141,19 @@ class InMemoryQueue:
     def push(self, job: ApplyJob) -> str:
         job.job_id = job.job_id or ApplyJob.make_id()
         self._pending.append(job)
+        try:
+            InMemoryQueue._recent_list.append({
+                "job_id": job.job_id,
+                "company": job.company,
+                "title": job.title,
+                "boss_job_id": job.boss_job_id,
+                "status": "queued",
+                "created_at": job.created_at,
+            })
+            if len(InMemoryQueue._recent_list) > InMemoryQueue._recent_max:
+                InMemoryQueue._recent_list = InMemoryQueue._recent_list[-InMemoryQueue._recent_max:]
+        except Exception:
+            pass
         return job.job_id
 
     def pop(self, timeout: int = 0) -> Optional[ApplyJob]:
@@ -160,10 +175,11 @@ class InMemoryQueue:
 
 
     def recent(self, limit: int = 50) -> list:
-        combined = []
+        # include class-level recent first so pending/queued jobs don't get lost
+        combined = list(InMemoryQueue._recent_list)
         for job in list(self._pending):
             d = asdict(job)
-            d["status"] = "pending"
+            d["status"] = "queued"
             combined.append(d)
         for job_id, job in list(self._processing.items()):
             d = asdict(job)
@@ -176,8 +192,15 @@ class InMemoryQueue:
         for item in list(self._failed):
             combined.append(item.copy())
             combined[-1]["status"] = "failed"
-        combined.sort(key=lambda x: x.get("created_at", ""), reverse=True)
-        return combined[: max(1, limit)]
+        deduped = []
+        seen = set()
+        for x in combined:
+            k = x.get("job_id") or x.get("job_id") if isinstance(x, dict) else id(x)
+            if k not in seen:
+                seen.add(k)
+                deduped.append(x)
+        deduped.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        return deduped[: max(1, limit)]
 
     def get_stats(self) -> dict:
         return {

@@ -430,6 +430,11 @@ async def boss_apply_result(run_id: str):
       job = next((j for j in jobs if j.get("job_id") == run_id), None)
   if not job:
       raise HTTPException(404, "run_id not found")
+  # preserve extra fields like account_session_dir if present
+  extra = {}
+  for k in ["account_label", "account_session_dir", "session_dir", "cover_letter"]:
+      if k in job:
+          extra[k] = job[k]
   return {
     "run_id": run_id,
     "status": job.get("status", "queued"),
@@ -437,6 +442,7 @@ async def boss_apply_result(run_id: str):
     "title": job.get("title", ""),
     "boss_job_id": job.get("boss_job_id", ""),
     "created_at": str(job.get("created_at", "")),
+    **extra,
   }
 
 @app.get("/boss/jobs/{boss_job_id}")
@@ -449,7 +455,11 @@ async def boss_apply_recent(limit: int = 20):
   out = []
   if hasattr(q, "recent"):
     for j in q.recent(limit=limit):
-      out.append({"run_id": j.get("job_id"), "status": j.get("status"), "company": j.get("company"), "title": j.get("title"), "boss_job_id": j.get("boss_job_id", ""), "created_at": j.get("created_at")})
+      item = {"run_id": j.get("job_id"), "status": j.get("status"), "company": j.get("company"), "title": j.get("title"), "boss_job_id": j.get("boss_job_id", ""), "created_at": j.get("created_at")}
+      for k in ["account_session_dir", "session_dir", "account_label", "cover_letter"]:
+        if k in j:
+          item[k] = j[k]
+      out.append(item)
   return {"items": out}
 
 @app.get("/alerts/recent")
